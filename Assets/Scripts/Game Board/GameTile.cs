@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GameTile : MonoBehaviour
 {
-    public GamePiece CurrentlyHeldPiece { get; set; } //The game piece currently held by the game tile
+    public GamePieceScheme CurrentlyHeldPiece { get; set; } //The game piece currently held by the game tile
     private GameboardManager _gameboardManager; //Reference to the GameboardManager
 
     // Start is called before the first frame update

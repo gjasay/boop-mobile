@@ -1,3 +1,4 @@
+using Colyseus;
 using UnityEngine;
 
 public class GameboardManager : MonoBehaviour
@@ -8,24 +9,27 @@ public class GameboardManager : MonoBehaviour
     [SerializeField] private GameObject _purpleTadpolePrefab; //Reference to the purple tadpole prefab
     private GameObject _selectedGamePiecePrefab; //Reference to the selected game piece prefab
     private GameTile[,] _gameTiles; //2D array of GameTile objects
+    private ColyseusClient _client; //Reference to the Colyseus client
+    private ColyseusRoom<GameState> _room; //Reference to the Game room
+    private string _clientId; // The client id of the player
+    private string _roomId; // The room id of the room
+    private int _playerId; // The player id of the player (1 or 2)
 
     private void Start()
     {
-        //Create a 6x6 game board
-        CreateGameboard(6, 6);
+        CreateRoom();
 
         //Testing
         _selectedGamePiecePrefab = _orangeTadpolePrefab;
     }
 
-
     /*---------------------------------------------------------
      * Create a game board with the specified width and height
-     * @param width The width of the game board
-     * @param height The height of the game board
-     * @param tileSize The size of each tile in the game board
+     * @param width - The width of the game board
+     * @param height - The height of the game board
+     * @param tileSize - The size of each tile in the game board
      ----------------------------------------------------------*/
-    public void CreateGameboard(int width, int height, float tileSize = 0.65f)
+    public void CreateGameboard(int width = 6, int height = 6, float tileSize = 0.65f)
     {
         _gameTiles = new GameTile[width, height];
 
@@ -58,7 +62,65 @@ public class GameboardManager : MonoBehaviour
 
         GameObject gamePiece =  Instantiate(_selectedGamePiecePrefab, SelectedGameTile.transform.position, Quaternion.identity);
 
-        SelectedGameTile.CurrentlyHeldPiece = gamePiece.GetComponent<GamePiece>();
+        SelectedGameTile.CurrentlyHeldPiece = gamePiece.GetComponent<GamePieceScheme>();
     }
 
+    /*---------------------------------------
+     * Create a new room on the server
+     ----------------------------------------*/
+    async public void CreateRoom()
+    {
+        _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
+        _room = await _client.Create<GameState>("my_room"); //Create a new room on the server
+
+        await _room.Send("createRoom"); //Send a message to the server to create a room
+
+        GetClientId();
+        GetRoomId();
+
+        CreateGameboard(); //Create a 6x6 game board
+
+        _playerId = 1;
+    }
+
+    /*---------------------------------------
+     * Join an existing room on the server
+     * @param roomId - The id of the room to join
+     ----------------------------------------*/
+    async public void JoinRoom(string roomId)
+    {
+        _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
+        _room = await _client.JoinById<GameState>(roomId); //Join a colyseus room
+
+        await _room.Send("joinRoom"); //Send a message to the server to join the room
+
+        GetClientId(); 
+        CreateGameboard(); //Create a 6x6 game board
+
+        _playerId = 2; //Set the player id to 2
+    }
+
+    /*---------------------------------------
+     * Get the client id of the player
+     ----------------------------------------*/
+     private void GetClientId()
+     {
+        _room.OnMessage<string>("sessionId", (message) =>
+        {
+            _clientId = message;
+            Debug.Log("Client ID: " + _clientId);
+        });
+     }
+
+    /*---------------------------------------
+     * Get the room id of the room
+    ----------------------------------------*/
+    private void GetRoomId()
+    {
+        _room.OnMessage<string>("roomId", (message) =>
+        {
+            _roomId = message;
+            Debug.Log("Room ID: " + _roomId);
+        });
+    }
 }
