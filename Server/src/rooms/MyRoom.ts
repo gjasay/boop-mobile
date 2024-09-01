@@ -1,5 +1,5 @@
 import { Room, Client } from "@colyseus/core";
-import { GameState } from "./schema/RoomState";
+import { GameState } from "./schema/GameState";
 
 export class MyRoom extends Room<GameState> {
   maxClients = 2;
@@ -16,6 +16,15 @@ export class MyRoom extends Room<GameState> {
       console.log(this.state.playerOne.sessionId, "created room");
       client.send("sessionId", client.sessionId);
       client.send("roomId", this.roomId);
+    });
+
+    /*------------------------------------------------
+     * Join a room and set playerTwo's sessionId
+    -------------------------------------------------*/
+    this.onMessage("joinRoom", (client, message) => {
+      this.state.playerTwo.sessionId = client.sessionId;
+      console.log(this.state.playerTwo.sessionId, "joined room");
+      client.send("sessionId", client.sessionId);
     });
   }
 

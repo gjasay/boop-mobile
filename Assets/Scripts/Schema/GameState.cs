@@ -22,6 +22,9 @@ public GameState() { }
 	[Type(1, "ref", typeof(PlayerState))]
 	public PlayerState playerTwo = new PlayerState();
 
+	[Type(2, "ref", typeof(BoardState))]
+	public BoardState board = new BoardState();
+
 	/*
 	 * Support for individual property change callbacks below...
 	 */
@@ -50,10 +53,23 @@ public GameState() { }
 		};
 	}
 
+	protected event PropertyChangeHandler<BoardState> __boardChange;
+	public Action OnBoardChange(PropertyChangeHandler<BoardState> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.board));
+		__boardChange += __handler;
+		if (__immediate && this.board != null) { __handler(this.board, null); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(board));
+			__boardChange -= __handler;
+		};
+	}
+
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(playerOne): __playerOneChange?.Invoke((PlayerState) change.Value, (PlayerState) change.PreviousValue); break;
 			case nameof(playerTwo): __playerTwoChange?.Invoke((PlayerState) change.Value, (PlayerState) change.PreviousValue); break;
+			case nameof(board): __boardChange?.Invoke((BoardState) change.Value, (BoardState) change.PreviousValue); break;
 			default: break;
 		}
 	}

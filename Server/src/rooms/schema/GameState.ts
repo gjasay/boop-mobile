@@ -1,5 +1,9 @@
 import { Schema, ArraySchema, type } from "@colyseus/schema";
 
+/*-------------------
+ * Schema Definitions
+ --------------------*/
+
 class PositionState extends Schema
 {
   @type("number") x: number;
@@ -23,8 +27,15 @@ class PlayerState extends Schema
   @type(HandState) hand = new HandState();
 }
 
+class BoardState extends Schema
+{
+  @type({ array: GamePieceState }) tadpoles = new ArraySchema<GamePieceState>();
+  @type({ array: GamePieceState }) frogs = new ArraySchema<GamePieceState>();
+}
+
 export class GameState extends Schema
 {
   @type(PlayerState) playerOne = new PlayerState();
   @type(PlayerState) playerTwo = new PlayerState();
+  @type(BoardState) board = new BoardState();
 }

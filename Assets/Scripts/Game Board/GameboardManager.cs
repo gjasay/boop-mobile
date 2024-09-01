@@ -4,9 +4,11 @@ using UnityEngine;
 public class GameboardManager : MonoBehaviour
 {
     public GameTile SelectedGameTile { get; set; } // The currently selected game tile
+    public GameTile LastTouchedGameTile { get; set; } // The last touched game tile
     [SerializeField] private GameObject _gameTilePrefab; //Reference to the GameTile prefab
     [SerializeField] private GameObject _orangeTadpolePrefab; //Reference to the orange tadpole prefab
     [SerializeField] private GameObject _purpleTadpolePrefab; //Reference to the purple tadpole prefab
+    private UIManager _uiManager; //Reference to the UIManager
     private GameObject _selectedGamePiecePrefab; //Reference to the selected game piece prefab
     private GameTile[,] _gameTiles; //2D array of GameTile objects
     private ColyseusClient _client; //Reference to the Colyseus client
@@ -17,10 +19,65 @@ public class GameboardManager : MonoBehaviour
 
     private void Start()
     {
-        CreateRoom();
+        _uiManager = GameObject.Find("UI").GetComponent<UIManager>(); //Get the UIManager component
+
 
         //Testing
+        CreateRoom();
         _selectedGamePiecePrefab = _orangeTadpolePrefab;
+    }
+
+    public GameTile[,] GameTiles => _gameTiles; //Get the 2D array of GameTile objects
+
+    /*--------------------------------------------------------------
+     * This method is called when the place button is pressed
+     * Place a game piece on the selected game tile
+     * Communicate to the selected game tile that it is holding a game piece
+     -----------------------------------------------------------------------*/
+    public void PlaceGamePiece()
+    {
+        if (SelectedGameTile == null || SelectedGameTile.CurrentlyHeldPiece != null) return;
+
+        GameObject gamePiece = Instantiate(_selectedGamePiecePrefab, SelectedGameTile.transform.position, Quaternion.identity);
+
+        SelectedGameTile.CurrentlyHeldPiece = gamePiece.GetComponent<GamePiece>();
+    }
+
+    /*---------------------------------------
+     * Create a new room on the server
+     ----------------------------------------*/
+    public async void CreateRoom()
+    {
+        _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
+        _room = await _client.Create<GameState>("my_room"); //Create a new room on the server
+
+        await _room.Send("createRoom"); //Send a message to the server to create a room
+
+        GetClientId();
+        GetRoomId();
+
+        CreateGameboard(); //Create a 6x6 game board
+
+        _playerId = 1;
+    }
+
+    /*---------------------------------------
+     * Join an existing room on the server
+     * @param roomId - The id of the room to join
+     ----------------------------------------*/
+    public async void JoinRoom(string roomId)
+    {
+        _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
+        _room = await _client.JoinById<GameState>(roomId); //Join a colyseus room
+
+        await _room.Send("joinRoom"); //Send a message to the server to join the room
+
+        _uiManager.DisableRoomCodeText(); //Disable the room code text
+
+        GetClientId();
+        CreateGameboard(); //Create a 6x6 game board
+
+        _playerId = 2; //Set the player id to 2
     }
 
     /*---------------------------------------------------------
@@ -29,7 +86,7 @@ public class GameboardManager : MonoBehaviour
      * @param height - The height of the game board
      * @param tileSize - The size of each tile in the game board
      ----------------------------------------------------------*/
-    public void CreateGameboard(int width = 6, int height = 6, float tileSize = 0.65f)
+    private void CreateGameboard(int width = 6, int height = 6, float tileSize = 0.65f)
     {
         _gameTiles = new GameTile[width, height];
 
@@ -51,66 +108,17 @@ public class GameboardManager : MonoBehaviour
         }
     }
 
-    /*--------------------------------------------------------------
-     * This method is called when the place button is pressed
-     * Place a game piece on the selected game tile
-     * Communicate to the selected game tile that it is holding a game piece
-     -----------------------------------------------------------------------*/
-    public void PlaceGamePiece()
-    {
-        if (SelectedGameTile == null || SelectedGameTile.CurrentlyHeldPiece != null) return;
-
-        GameObject gamePiece =  Instantiate(_selectedGamePiecePrefab, SelectedGameTile.transform.position, Quaternion.identity);
-
-        SelectedGameTile.CurrentlyHeldPiece = gamePiece.GetComponent<GamePieceScheme>();
-    }
-
-    /*---------------------------------------
-     * Create a new room on the server
-     ----------------------------------------*/
-    async public void CreateRoom()
-    {
-        _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
-        _room = await _client.Create<GameState>("my_room"); //Create a new room on the server
-
-        await _room.Send("createRoom"); //Send a message to the server to create a room
-
-        GetClientId();
-        GetRoomId();
-
-        CreateGameboard(); //Create a 6x6 game board
-
-        _playerId = 1;
-    }
-
-    /*---------------------------------------
-     * Join an existing room on the server
-     * @param roomId - The id of the room to join
-     ----------------------------------------*/
-    async public void JoinRoom(string roomId)
-    {
-        _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
-        _room = await _client.JoinById<GameState>(roomId); //Join a colyseus room
-
-        await _room.Send("joinRoom"); //Send a message to the server to join the room
-
-        GetClientId(); 
-        CreateGameboard(); //Create a 6x6 game board
-
-        _playerId = 2; //Set the player id to 2
-    }
-
     /*---------------------------------------
      * Get the client id of the player
      ----------------------------------------*/
-     private void GetClientId()
-     {
+    private void GetClientId()
+    {
         _room.OnMessage<string>("sessionId", (message) =>
         {
             _clientId = message;
             Debug.Log("Client ID: " + _clientId);
         });
-     }
+    }
 
     /*---------------------------------------
      * Get the room id of the room
@@ -120,7 +128,9 @@ public class GameboardManager : MonoBehaviour
         _room.OnMessage<string>("roomId", (message) =>
         {
             _roomId = message;
-            Debug.Log("Room ID: " + _roomId);
+
+            if (_uiManager == null) return;
+            _uiManager.SetRoomCode(_roomId);
         });
     }
 }
