@@ -11,10 +11,10 @@ public enum GamePieceType
 
 public class DraggableUIGamePiece : MonoBehaviour
 {
+    public bool IsDragging { get; set; } //True if the game piece is being dragged
     [SerializeField] private GamePieceType gamePieceType; //The type of game piece
     private SpriteRenderer _spriteRenderer; //Reference to the sprite renderer
     private GameObject _prefab; //Reference to the prefab to be instantiated
-    private bool _isDragging; //True if the game piece is being dragged
 
     // Start is called before the first frame update
     void Start()
@@ -81,11 +81,13 @@ public class DraggableUIGamePiece : MonoBehaviour
      ---------------------------------------------------------------*/
      private void DragPiece()
      {
-        if (DetectTouch() && !_isDragging)
+        if (DetectTouch() && !IsDragging)
         {
             GameObject newGamePiece = Instantiate(_prefab, transform.position, Quaternion.identity);
+            GameObject.Find("GameboardManager").GetComponent<GameboardManager>().LastTouchedGameTile = null;
             newGamePiece.AddComponent<PieceDragging>();
-            _isDragging = true;
+            newGamePiece.GetComponent<PieceDragging>().UIGamePiece = this;
+            IsDragging = true;
         }
      }
 
