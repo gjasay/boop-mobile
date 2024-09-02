@@ -4,30 +4,31 @@ import { Schema, ArraySchema, type } from "@colyseus/schema";
  * Schema Definitions
  --------------------*/
 
-class PositionState extends Schema
+export class PositionState extends Schema
 {
-  @type("number") x: number;
-  @type("number") y: number;
+  @type("float32") x: number;
+  @type("float32") y: number;
 }
 
-class GamePieceState extends Schema
+export class GamePieceState extends Schema
 {
   @type(PositionState) position = new PositionState();
+  @type("int32") playerId: number; // 1 or 2
 }
 
-class HandState extends Schema
+export class HandState extends Schema
 {
-  @type({ array: GamePieceState }) tadpoles = new ArraySchema<GamePieceState>();
-  @type({ array: GamePieceState }) frogs = new ArraySchema<GamePieceState>();
+  @type("int32") tadpoles = 8; // Starting number of tadpoles
+  @type("int32") frogs = 0; // Starting number of frogs
 }
 
-class PlayerState extends Schema
+export class PlayerState extends Schema
 {
   @type("string") sessionId: string;
   @type(HandState) hand = new HandState();
 }
 
-class BoardState extends Schema
+export class BoardState extends Schema
 {
   @type({ array: GamePieceState }) tadpoles = new ArraySchema<GamePieceState>();
   @type({ array: GamePieceState }) frogs = new ArraySchema<GamePieceState>();

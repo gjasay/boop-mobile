@@ -16,10 +16,10 @@ public partial class PositionState : Schema {
 [Preserve] 
 #endif
 public PositionState() { }
-	[Type(0, "number")]
+	[Type(0, "float32")]
 	public float x = default(float);
 
-	[Type(1, "number")]
+	[Type(1, "float32")]
 	public float y = default(float);
 
 	/*
