@@ -30,10 +30,17 @@ public class GameTile : MonoBehaviour
             Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
             touchPosition.z = 0;
 
-            //Check if the touch position is over the game tile
-            if (GetComponent<Collider2D>() == Physics2D.OverlapPoint(touchPosition))
+            // Get all colliders at the touch position
+            Collider2D[] colliders = Physics2D.OverlapPointAll(touchPosition);
+
+            // Check if the touch position is over the game tile
+            foreach (var collider in colliders)
             {
-                _gameboardManager.LastTouchedGameTile = this;
+                if (collider == GetComponent<Collider2D>())
+                {
+                    _gameboardManager.LastTouchedGameTile = this;
+                    break;
+                }
             }
         }
     }

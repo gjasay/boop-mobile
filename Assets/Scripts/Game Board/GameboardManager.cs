@@ -5,11 +5,9 @@ public class GameboardManager : MonoBehaviour
 {
     public GameTile SelectedGameTile { get; set; } // The currently selected game tile
     public GameTile LastTouchedGameTile { get; set; } // The last touched game tile
+    public bool CurrentlyTouchingGameBoard { get; private set; } // True if the player is currently touching the game board
     [SerializeField] private GameObject _gameTilePrefab; //Reference to the GameTile prefab
-    [SerializeField] private GameObject _orangeTadpolePrefab; //Reference to the orange tadpole prefab
-    [SerializeField] private GameObject _purpleTadpolePrefab; //Reference to the purple tadpole prefab
     private UIManager _uiManager; //Reference to the UIManager
-    private GameObject _selectedGamePiecePrefab; //Reference to the selected game piece prefab
     private GameTile[,] _gameTiles; //2D array of GameTile objects
     private ColyseusClient _client; //Reference to the Colyseus client
     private ColyseusRoom<GameState> _room; //Reference to the Game room
@@ -21,26 +19,13 @@ public class GameboardManager : MonoBehaviour
     {
         _uiManager = GameObject.Find("UI").GetComponent<UIManager>(); //Get the UIManager component
 
-
         //Testing
         CreateRoom();
-        _selectedGamePiecePrefab = _orangeTadpolePrefab;
     }
 
-    public GameTile[,] GameTiles => _gameTiles; //Get the 2D array of GameTile objects
-
-    /*--------------------------------------------------------------
-     * This method is called when the place button is pressed
-     * Place a game piece on the selected game tile
-     * Communicate to the selected game tile that it is holding a game piece
-     -----------------------------------------------------------------------*/
-    public void PlaceGamePiece()
+    private void Update()
     {
-        if (SelectedGameTile == null || SelectedGameTile.CurrentlyHeldPiece != null) return;
-
-        GameObject gamePiece = Instantiate(_selectedGamePiecePrefab, SelectedGameTile.transform.position, Quaternion.identity);
-
-        SelectedGameTile.CurrentlyHeldPiece = gamePiece.GetComponent<GamePiece>();
+        IsPlayerTouchingGameBoard();
     }
 
     /*---------------------------------------
@@ -132,5 +117,24 @@ public class GameboardManager : MonoBehaviour
             if (_uiManager == null) return;
             _uiManager.SetRoomCode(_roomId);
         });
+    }
+
+    private void IsPlayerTouchingGameBoard()
+    {
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
+            touchPosition.z = 0;
+
+            if (Physics2D.OverlapPoint(touchPosition) != null)
+            {
+                CurrentlyTouchingGameBoard = true;
+            }
+            else
+            {
+                CurrentlyTouchingGameBoard = false;
+            }
+        }
     }
 }

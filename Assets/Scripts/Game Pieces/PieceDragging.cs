@@ -1,36 +1,83 @@
 using UnityEngine;
 
+/*-----------------------------------------------------------------------------
+ * This class is responsible for handling the dragging state of a game piece
+ ------------------------------------------------------------------------------*/
 public class PieceDragging : MonoBehaviour
 {
     public DraggableUIGamePiece UIGamePiece { get; set; } //The UI game piece I'm being dragged from
     private bool _isDragging = true; //True if the piece is being dragged
+    private GameboardManager _gameboardManager; //Reference to the gameboard manager
 
+    // Start is called before the first frame update
+    private void Start()
+    {
+        _gameboardManager = GameObject.Find("GameboardManager").GetComponent<GameboardManager>(); //Get a reference to the GameboardManager
+    }
     //Update is called once per frame
     void Update()
     {
         UpdateCurrentPosition();
+        CheckForDestruction();
     }
 
+    /*--------------------------------------------------------------------------------
+     * Update the current position
+     * This method is responsible for updating the current position of the game piece
+     ---------------------------------------------------------------------------------*/
     private void UpdateCurrentPosition()
     {
-        if (_isDragging == false) return;
-
-        Vector2? touchPosition = GetTouchPosition();
-        
-        if (touchPosition == null)
+        if (!_isDragging) 
         {
-            Destroy(gameObject);
+            SetPieceOnTile();
         }
-        else
+
+        Vector2? touchPosition = CalculatePosition();
+        
+        if (touchPosition != null)
         {
             transform.position = new Vector3(touchPosition.Value.x, touchPosition.Value.y, 0);
         }
     }
 
-    /*------------------------
-     * Get the touch position
-     -------------------------*/
-    private Vector2? GetTouchPosition()
+    /*--------------------------------------------------------------
+     * Will destroy the game piece if the touch position is invalid
+     ---------------------------------------------------------------*/
+    private void CheckForDestruction()
+    {
+        Vector2? touchPosition = CalculatePosition();
+
+        if (touchPosition == null)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    /*------------------------------------------------------------------------------------------------
+     * Set piece on tile
+     * This method is responsible for checking if the tile is empty and setting the piece on the tile
+     -------------------------------------------------------------------------------------------------*/
+    private void SetPieceOnTile()
+    {
+        GameTile gameTile = _gameboardManager.LastTouchedGameTile;
+
+        if (gameTile == null || gameTile.CurrentlyHeldPiece != null)
+        {
+            Destroy(gameObject);
+            return;
+        } 
+
+        transform.position = gameTile.transform.position;
+
+        gameTile.CurrentlyHeldPiece = gameObject.AddComponent<GamePiece>();
+    }
+
+    /*--------------------------------------------------------------------------------------
+     * Calculate the position for the game piece in this drag state
+     * @return Vector2? - The touch position while dragging
+     * @return Vector2? - Game tile position (or null) if the player is finished dragging
+     --------------------------------------------------------------------------------------*/
+    private Vector2? CalculatePosition()
     {
         if (Input.touchCount > 0)
         {
@@ -51,12 +98,13 @@ public class PieceDragging : MonoBehaviour
     /*---------------------------------------------
      * Get the position of the nearest game tile
      * @return Vector2 - The position of the nearest game tile
+     * @return null - If the player is not touching the game board
      ----------------------------------------------*/
     private Vector2? GetNearestGameTilePosition()
     {
-        GameTile gameTile = GameObject.Find("GameboardManager").GetComponent<GameboardManager>().LastTouchedGameTile;
+        GameTile gameTile = _gameboardManager.LastTouchedGameTile;
 
-        if (gameTile == null) return null;
+        if (gameTile == null || !_gameboardManager.CurrentlyTouchingGameBoard) return null;
 
         return gameTile.transform.position;
     }
