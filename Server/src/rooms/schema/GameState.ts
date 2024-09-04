@@ -10,9 +10,16 @@ export class PositionState extends Schema
   @type("float32") y: number;
 }
 
+export class TileState extends Schema
+{
+  //These represent the position of the tile in the 2D array
+  @type("int32") x: number; 
+  @type("int32") y: number;
+}
+
 export class GamePieceState extends Schema
 {
-  @type(PositionState) position = new PositionState();
+  @type(TileState) tile = new TileState();
   @type("int32") playerId: number; // 1 or 2
 }
 
