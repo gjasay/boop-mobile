@@ -1,76 +1,27 @@
 using UnityEngine;
 
-public enum GamePieceType
-{
-  OrangeTadpole,
-  PurpleTadpole,
-  OrangeFrog,
-  PurpleFrog
-}
-
 public class DraggableUIGamePiece : MonoBehaviour
 {
   public bool IsDragging { get; set; } //True if the game piece is being dragged
   [SerializeField] private GamePieceType gamePieceType; //The type of game piece
   private SpriteRenderer _spriteRenderer; //Reference to the sprite renderer
+  private ResourceManager _resourceManager; //Reference to the resource manager
   private GameObject _prefab; //Reference to the prefab to be instantiated
 
   // Start is called before the first frame update
   void Start()
   {
     _spriteRenderer = GetComponent<SpriteRenderer>();
-    SetSprite();
-    SetPrefab();
+    _resourceManager = ResourceManager.Instance;
+
+    _spriteRenderer.sprite = _resourceManager.GetSprite(gamePieceType);
+    _prefab = _resourceManager.GetPrefab(gamePieceType);
   }
 
   // Update is called once per frame
   void Update()
   {
     DragPiece();
-  }
-
-  /*-----------------------------------------------------------------
-  * This method changes the sprite depending on the game piece type
-  ------------------------------------------------------------------*/
-  private void SetSprite()
-  {
-    switch (gamePieceType)
-    {
-      case GamePieceType.OrangeTadpole:
-        _spriteRenderer.sprite = Resources.Load<Sprite>("Art/orange_tadpole");
-        break;
-      case GamePieceType.PurpleTadpole:
-        _spriteRenderer.sprite = Resources.Load<Sprite>("Art/purple_tadpole");
-        break;
-      case GamePieceType.OrangeFrog:
-        _spriteRenderer.sprite = Resources.Load<Sprite>("Art/orange_frog");
-        break;
-      case GamePieceType.PurpleFrog:
-        _spriteRenderer.sprite = Resources.Load<Sprite>("Art/purple_frog");
-        break;
-    }
-  }
-
-  /*-----------------------------------------------------------------------------------
-   * This method sets the prefab to be instantiated depending on the game piece type
-  -----------------------------------------------------------------------------------*/
-  private void SetPrefab()
-  {
-    switch (gamePieceType)
-    {
-      case GamePieceType.OrangeTadpole:
-        _prefab = Resources.Load<GameObject>("Prefabs/Orange Tadpole");
-        break;
-      case GamePieceType.PurpleTadpole:
-        _prefab = Resources.Load<GameObject>("Prefabs/Purple Tadpole");
-        break;
-      case GamePieceType.OrangeFrog:
-        _prefab = Resources.Load<GameObject>("Prefabs/Orange Frog");
-        break;
-      case GamePieceType.PurpleFrog:
-        _prefab = Resources.Load<GameObject>("Prefabs/Purple Frog");
-        break;
-    }
   }
 
   /*--------------------------------------------------------------

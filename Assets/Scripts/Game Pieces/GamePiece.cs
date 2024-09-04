@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class GamePiece : MonoBehaviour
 {
-  public GameTile GameTilePlacement { set; get; } //The game tile the game piece is placed on
-  private GameboardManager _gameboardManager; //Reference to the GameboardManager
+  public GameTile GameTilePlacement { private set; get; } //The game tile the game piece is placed on
+  private NetworkManager _networkManager; //Reference to the GameboardManager
   private void Start()
   {
-    _gameboardManager = GameObject.Find("GameboardManager").GetComponent<GameboardManager>(); //Get a reference to the GameboardManager
+    _networkManager = NetworkManager.Instance;
 
     SendPlacement();
   }
@@ -20,10 +20,10 @@ public class GamePiece : MonoBehaviour
 
   private void SendPlacement()
   {
-    _gameboardManager.SendTadpolePlacement(new GamePieceState
+    _networkManager.SendTadpolePlacement(new GamePieceState
     {
       position = { x = GameTilePlacement.transform.position.x, y = GameTilePlacement.transform.position.y },
-      playerId = _gameboardManager.PlayerId,
+      playerId = _networkManager.PlayerId,
     });
   }
 

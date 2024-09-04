@@ -3,25 +3,32 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private UIManager _uiManager; // Reference to the UIManager
-    private GameboardManager _gameboardManager;
+    private UIManager _uiManager; // Reference to the UIManager
+    private NetworkManager _networkManager; // Reference to the NetworkManager
 
     void Start()
     {
         _uiManager = GameObject.Find("UI").GetComponent<UIManager>();
+        _networkManager = NetworkManager.Instance;
     }
 
     public void CreateGame()
     {
         SceneManager.LoadScene("Main");
 
-        SceneManager.sceneLoaded += (scene, mode) =>
+        SceneManager.sceneLoaded += async (scene, mode) =>
         {
             if (scene.name != "Main") return;
-            
-            _gameboardManager = GameObject.Find("GameboardManager").GetComponent<GameboardManager>();
-            if (_gameboardManager == null) return;
-            _gameboardManager.CreateRoom();
+
+            _networkManager = NetworkManager.Instance;
+
+            if (_networkManager == null)
+            {
+                Debug.LogError("NetworkManager is null");
+                return;
+            }
+
+            await _networkManager.CreateRoom("my_room");
         };
     }
 
@@ -31,13 +38,19 @@ public class GameManager : MonoBehaviour
 
         string roomCode = _uiManager.GetRoomCode();   
 
-        SceneManager.sceneLoaded += (scene, mode) =>
+        SceneManager.sceneLoaded += async (scene, mode) =>
         {
             if (scene.name != "Main") return;
-            
-            _gameboardManager = GameObject.Find("GameboardManager").GetComponent<GameboardManager>();
-            if (_gameboardManager == null) return;
-            _gameboardManager.JoinRoom(roomCode);
+
+            _networkManager = NetworkManager.Instance;
+
+            if (_networkManager == null)
+            {
+                Debug.LogError("NetworkManager is null");
+                return;
+            }
+
+            await _networkManager.JoinRoom(roomCode);
         };
     }
 }
