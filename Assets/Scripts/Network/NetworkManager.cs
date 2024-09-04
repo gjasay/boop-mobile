@@ -14,6 +14,7 @@ public class NetworkManager : MonoBehaviour
 
     /* Events */
     public event Action<GamePieceState> OnTadpolePlaced; //Event that is triggered when the game state changes
+    public event Action<GamePieceState> OnFrogPlaced; //Event that is triggered when the game state changes
 
     /* Private variables */
     private ColyseusClient _client; //Reference to the Colyseus client
@@ -37,6 +38,8 @@ public class NetworkManager : MonoBehaviour
     private void Start()
     {
         _uiManager = GameObject.Find("UI").GetComponent<UIManager>();
+
+        //Test
     }
 
     /*------------------------------------------
@@ -55,6 +58,7 @@ public class NetworkManager : MonoBehaviour
         _uiManager.SetRoomCode(RoomId);
 
         PlayerId = 1;
+        GamePieceManager.Instance.SetFrogType(PlayerId);
         GamePieceManager.Instance.SetTadpoleType(PlayerId);
     }
 
@@ -74,6 +78,7 @@ public class NetworkManager : MonoBehaviour
         _uiManager.DisableRoomCodeText();
 
         PlayerId = 2;
+        GamePieceManager.Instance.SetFrogType(PlayerId);
         GamePieceManager.Instance.SetTadpoleType(PlayerId);
     }
 
@@ -85,6 +90,16 @@ public class NetworkManager : MonoBehaviour
     {
         NullCheckRoom();
         await _room.Send("placeTadpole", gamePieceState);
+    }
+
+    /*------------------------------------------------
+    * Send a message to the server to place a frog
+    * @param gamePieceState - The game piece state
+    --------------------------------------------------*/
+    public async void SendFrogPlacement(GamePieceState gamePieceState)
+    {
+        NullCheckRoom();
+        await _room.Send("placeFrog", gamePieceState);
     }
 
     /*-------------------------------
@@ -100,9 +115,19 @@ public class NetworkManager : MonoBehaviour
     -----------------------------*/
     private void RegisterRoomHandlers()
     {
+        NullCheckRoom();
+
+        /*-------------------------------------------
+        * Trigger events when the game state changes
+        ---------------------------------------------*/
         _room.OnMessage<GamePieceState>("tadpolePlaced", (message) =>
         {
             OnTadpolePlaced?.Invoke(message);
+        });
+
+        _room.OnMessage<GamePieceState>("frogPlaced", (message) =>
+        {
+            OnFrogPlaced?.Invoke(message);
         });
     }
 

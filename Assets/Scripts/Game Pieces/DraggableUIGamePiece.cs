@@ -1,27 +1,56 @@
 using UnityEngine;
 
+
+
 public class DraggableUIGamePiece : MonoBehaviour
 {
+  //Properties
   public bool IsDragging { get; set; } //True if the game piece is being dragged
-  [SerializeField] private GamePieceType gamePieceType; //The type of game piece
+
+  private enum DraggerType { Tadpole, Frog } //The type of game piece this dragger is responsible for
+
+  [SerializeField] private DraggerType _draggerType; //The type of game piece that can be dragged
+
+  //Private variables
   private SpriteRenderer _spriteRenderer; //Reference to the sprite renderer
   private ResourceManager _resourceManager; //Reference to the resource manager
+  private GamePieceManager _gamePieceManager;
   private GameObject _prefab; //Reference to the prefab to be instantiated
+  private Sprite _sprite; //The sprite of the game piece
 
   // Start is called before the first frame update
   void Start()
   {
     _spriteRenderer = GetComponent<SpriteRenderer>();
     _resourceManager = ResourceManager.Instance;
-
-    _spriteRenderer.sprite = _resourceManager.GetSprite(gamePieceType);
-    _prefab = _resourceManager.GetPrefab(gamePieceType);
+    _gamePieceManager = GamePieceManager.Instance;
   }
 
   // Update is called once per frame
   void Update()
   {
     DragPiece();
+  }
+
+  /*-----------------------------------------------
+   * Set the UI game pieces based on the player id
+   ------------------------------------------------*/
+
+  public void SetUIGamePieces()
+  {
+    switch (_draggerType)
+    {
+      case DraggerType.Tadpole:
+        _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientTadpoleType);
+        _sprite = _resourceManager.GetSprite(_gamePieceManager.ClientTadpoleType);
+        break;
+      case DraggerType.Frog:
+        _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientFrogType);
+        _sprite = _resourceManager.GetSprite(_gamePieceManager.ClientFrogType);
+        break;
+    }
+
+    _spriteRenderer.sprite = _sprite;
   }
 
   /*--------------------------------------------------------------
@@ -35,8 +64,11 @@ public class DraggableUIGamePiece : MonoBehaviour
     {
       GameObject newGamePiece = Instantiate(_prefab, transform.position, Quaternion.identity);
       GameObject.Find("GameboardManager").GetComponent<GameboardManager>().LastTouchedGameTile = null;
-      newGamePiece.AddComponent<PieceDragging>();
-      newGamePiece.GetComponent<PieceDragging>().UIGamePiece = this;
+      newGamePiece.AddComponent<DragHandler>();
+      newGamePiece.GetComponent<DragHandler>().UIGamePiece = this;
+
+      //Set the game piece type
+      newGamePiece.GetComponent<DragHandler>().TypeOfPiece = _draggerType == DraggerType.Tadpole ? _gamePieceManager.ClientTadpoleType : _gamePieceManager.ClientFrogType;
       IsDragging = true;
     }
   }

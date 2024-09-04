@@ -16,8 +16,8 @@ public partial class GamePieceState : Schema {
 [Preserve] 
 #endif
 public GamePieceState() { }
-	[Type(0, "ref", typeof(PositionState))]
-	public PositionState position = new PositionState();
+	[Type(0, "ref", typeof(TileState))]
+	public TileState tile = new TileState();
 
 	[Type(1, "int32")]
 	public int playerId = default(int);
@@ -26,15 +26,15 @@ public GamePieceState() { }
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<PositionState> __positionChange;
-	public Action OnPositionChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<TileState> __tileChange;
+	public Action OnTileChange(PropertyChangeHandler<TileState> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.position));
-		__positionChange += __handler;
-		if (__immediate && this.position != null) { __handler(this.position, null); }
+		__callbacks.AddPropertyCallback(nameof(this.tile));
+		__tileChange += __handler;
+		if (__immediate && this.tile != null) { __handler(this.tile, null); }
 		return () => {
-			__callbacks.RemovePropertyCallback(nameof(position));
-			__positionChange -= __handler;
+			__callbacks.RemovePropertyCallback(nameof(tile));
+			__tileChange -= __handler;
 		};
 	}
 
@@ -52,7 +52,7 @@ public GamePieceState() { }
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(position): __positionChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
+			case nameof(tile): __tileChange?.Invoke((TileState) change.Value, (TileState) change.PreviousValue); break;
 			case nameof(playerId): __playerIdChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			default: break;
 		}

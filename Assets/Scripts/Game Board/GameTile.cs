@@ -2,7 +2,11 @@ using UnityEngine;
 
 public class GameTile : MonoBehaviour
 {
-  public GamePiece CurrentlyHeldPiece { get; set; } //The game piece currently held by the game tile
+  //Properties
+  public Vector2Int ArrayPosition { get; set; } //The position of the game tile in the 2D array
+  public PlacedPiece CurrentlyHeldPiece { get; set; } //The game piece currently held by the game tile
+
+  //Private variables
   private GameboardManager _gameboardManager; //Reference to the GameboardManager
 
   // Start is called before the first frame update
@@ -12,6 +16,7 @@ public class GameTile : MonoBehaviour
     transform.SetParent(GameObject.Find("GameboardManager").transform); //Set the GameTile's parent to the GameboardManager
   }
 
+  // Update is called once per frame
   private void Update()
   {
     SetLastTouchedTile();

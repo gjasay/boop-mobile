@@ -33,12 +33,17 @@ public class GameboardManager : MonoBehaviour
     }
   }
 
+  //Start is called before the first frame update
   private void Start()
   {
+    //Get references to the managers
     _networkManager = NetworkManager.Instance;
     _resourceManager = ResourceManager.Instance;
     _gamePieceManager = GamePieceManager.Instance;
-    _networkManager.OnTadpolePlaced += PlaceTadpole;
+
+    //Subscribe to events
+    _networkManager.OnTadpolePlaced += PlaceOpponentTadpole;
+    _networkManager.OnFrogPlaced += PlaceOpponentFrog;
   }
 
   private void Update()
@@ -46,16 +51,45 @@ public class GameboardManager : MonoBehaviour
     IsPlayerTouchingGameBoard();
   }
 
-  private void PlaceTadpole(GamePieceState state)
+  /*---------------------------------------------------------
+  * Network event handlers
+  ----------------------------------------------------------*/
+
+  /*---------------------------------------------------------
+  * Place an opponent's tadpole on the game board
+  * @param state - The state of the game piece to place
+  ----------------------------------------------------------*/
+  private void PlaceOpponentTadpole(GamePieceState state)
   {
 
     if (state.playerId == _networkManager.PlayerId) return;
 
     GameObject prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentTadpoleType);
 
-    Vector2 position = new Vector2(state.position.x, state.position.y);
+    GameTile gameTile = GameTiles[state.tile.x, state.tile.y];
 
-    Instantiate(prefab, position, Quaternion.identity);
+    GameObject tadpole = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
+    PlacedPiece gamePiece = tadpole.AddComponent<PlacedPiece>();
+    gamePiece.SetTilePlacement(gameTile);
+    gamePiece.TypeOfPiece = _gamePieceManager.OpponentTadpoleType;
+  }
+
+  /*---------------------------------------------------------
+  * Place an opponent's frog on the game board
+  * @param state - The state of the game piece to place
+  ----------------------------------------------------------*/
+  private void PlaceOpponentFrog(GamePieceState state)
+  {
+    if (state.playerId == _networkManager.PlayerId) return;
+
+    GameObject prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentFrogType);
+
+    GameTile gameTile = GameTiles[state.tile.x, state.tile.y];
+
+    GameObject frog = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
+    PlacedPiece gamePiece = frog.AddComponent<PlacedPiece>();
+    gamePiece.SetTilePlacement(gameTile);
+    gamePiece.TypeOfPiece = _gamePieceManager.OpponentFrogType;
   }
 
   /*---------------------------------------------------------
@@ -80,6 +114,8 @@ public class GameboardManager : MonoBehaviour
       {
         GameObject newTile = Instantiate(_gameTilePrefab, new Vector3(startX + x * tileSize, startY + y * tileSize, 0), Quaternion.identity);
         GameTile gameTile = newTile.GetComponent<GameTile>();
+
+        gameTile.ArrayPosition = new Vector2Int(x, y);
 
         GameTiles[x, y] = gameTile;
       }

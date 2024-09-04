@@ -3,9 +3,10 @@ using UnityEngine;
 /*-----------------------------------------------------------------------------
  * This class is responsible for handling the dragging state of a game piece
  ------------------------------------------------------------------------------*/
-public class PieceDragging : MonoBehaviour
+public class DragHandler : MonoBehaviour
 {
   public DraggableUIGamePiece UIGamePiece { get; set; } //The UI game piece I'm being dragged from
+  public GamePieceType TypeOfPiece { get; set; } //The type of game piece
   private bool _isDragging = true; //True if the piece is being dragged
   private GameboardManager _gameboardManager; //Reference to the gameboard manager
 
@@ -69,9 +70,12 @@ public class PieceDragging : MonoBehaviour
 
     transform.position = gameTile.transform.position;
 
-    GamePiece gamePiece = gameObject.AddComponent<GamePiece>();
+    PlacedPiece gamePiece = gameObject.AddComponent<PlacedPiece>();
+
+    gamePiece.TypeOfPiece = TypeOfPiece;
 
     gamePiece.SetTilePlacement(gameTile);
+    gamePiece.SendPlacement();
   }
 
   /*--------------------------------------------------------------------------------------
