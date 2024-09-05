@@ -42,8 +42,8 @@ public class GameboardManager : MonoBehaviour
     _gamePieceManager = GamePieceManager.Instance;
 
     //Subscribe to events
-    _networkManager.OnTadpolePlaced += PlaceOpponentTadpole;
-    _networkManager.OnFrogPlaced += PlaceOpponentFrog;
+    _networkManager.OnTadpolePlaced += PlaceTadpole;
+    _networkManager.OnFrogPlaced += PlaceFrog;
   }
 
   private void Update()
@@ -59,12 +59,18 @@ public class GameboardManager : MonoBehaviour
   * Place an opponent's tadpole on the game board
   * @param state - The state of the game piece to place
   ----------------------------------------------------------*/
-  private void PlaceOpponentTadpole(GamePieceState state)
+  private void PlaceTadpole(GamePieceState state)
   {
+    GameObject prefab;
 
-    if (state.playerId == _networkManager.PlayerId) return;
-
-    GameObject prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentTadpoleType);
+    if (state.playerId == _networkManager.PlayerId)
+    {
+      prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientTadpoleType);
+    }
+    else
+    {
+      prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentTadpoleType);
+    }
 
     GameTile gameTile = GameTiles[state.tile.x, state.tile.y];
 
@@ -78,11 +84,18 @@ public class GameboardManager : MonoBehaviour
   * Place an opponent's frog on the game board
   * @param state - The state of the game piece to place
   ----------------------------------------------------------*/
-  private void PlaceOpponentFrog(GamePieceState state)
+  private void PlaceFrog(GamePieceState state)
   {
-    if (state.playerId == _networkManager.PlayerId) return;
+    GameObject prefab;
 
-    GameObject prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentFrogType);
+    if (state.playerId == _networkManager.PlayerId)
+    {
+      prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientFrogType);
+    }
+    else
+    {
+      prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentFrogType);
+    }
 
     GameTile gameTile = GameTiles[state.tile.x, state.tile.y];
 

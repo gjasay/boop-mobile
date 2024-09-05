@@ -67,16 +67,38 @@ public class DragHandler : MonoBehaviour
       Destroy(gameObject);
       return;
     }
-
     transform.position = gameTile.transform.position;
 
-    PlacedPiece gamePiece = gameObject.AddComponent<PlacedPiece>();
+    SendTilePlacement(gameTile); //Send the placement of the game piece to the server
 
-    gamePiece.TypeOfPiece = TypeOfPiece;
-
-    gamePiece.SetTilePlacement(gameTile);
-    gamePiece.SendPlacement();
+    Destroy(gameObject); //Destroy the game piece
   }
+
+    /*---------------------------------------------------------
+    * Send the placement of the game piece to the server
+    * @param gameTile - The game tile the game piece is placed on
+    ----------------------------------------------------------*/
+    private void SendTilePlacement(GameTile gameTile)
+    {
+      NetworkManager networkManager = NetworkManager.Instance;
+
+      if (TypeOfPiece == GamePieceType.OrangeTadpole || TypeOfPiece == GamePieceType.PurpleTadpole)
+      {
+        networkManager.SendTadpolePlacement(new GamePieceState
+        {
+          tile = { x = gameTile.ArrayPosition.x, y = gameTile.ArrayPosition.y },
+          playerId = networkManager.PlayerId,
+        });
+      }
+      else
+      {
+        networkManager.SendFrogPlacement(new GamePieceState
+        {
+          tile = { x = gameTile.ArrayPosition.x, y = gameTile.ArrayPosition.y },
+          playerId = networkManager.PlayerId,
+        });
+      }
+    }
 
   /*--------------------------------------------------------------------------------------
    * Calculate the position for the game piece in this drag state
