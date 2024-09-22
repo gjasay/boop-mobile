@@ -16,34 +16,79 @@ public partial class BoardState : Schema {
 [Preserve] 
 #endif
 public BoardState() { }
-	[Type(0, "array", typeof(ArraySchema<GamePieceState>))]
-	public ArraySchema<GamePieceState> tadpoles = new ArraySchema<GamePieceState>();
+	[Type(0, "array", typeof(ArraySchema<TileState>))]
+	public ArraySchema<TileState> tiles = new ArraySchema<TileState>();
 
-	[Type(1, "array", typeof(ArraySchema<GamePieceState>))]
-	public ArraySchema<GamePieceState> frogs = new ArraySchema<GamePieceState>();
+	[Type(1, "int32")]
+	public int width = default(int);
+
+	[Type(2, "int32")]
+	public int height = default(int);
+
+	[Type(3, "int32")]
+	public int tadpoles = default(int);
+
+	[Type(4, "int32")]
+	public int frogs = default(int);
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<ArraySchema<GamePieceState>> __tadpolesChange;
-	public Action OnTadpolesChange(PropertyChangeHandler<ArraySchema<GamePieceState>> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArraySchema<TileState>> __tilesChange;
+	public Action OnTilesChange(PropertyChangeHandler<ArraySchema<TileState>> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.tiles));
+		__tilesChange += __handler;
+		if (__immediate && this.tiles != null) { __handler(this.tiles, null); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(tiles));
+			__tilesChange -= __handler;
+		};
+	}
+
+	protected event PropertyChangeHandler<int> __widthChange;
+	public Action OnWidthChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.width));
+		__widthChange += __handler;
+		if (__immediate && this.width != default(int)) { __handler(this.width, default(int)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(width));
+			__widthChange -= __handler;
+		};
+	}
+
+	protected event PropertyChangeHandler<int> __heightChange;
+	public Action OnHeightChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.height));
+		__heightChange += __handler;
+		if (__immediate && this.height != default(int)) { __handler(this.height, default(int)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(height));
+			__heightChange -= __handler;
+		};
+	}
+
+	protected event PropertyChangeHandler<int> __tadpolesChange;
+	public Action OnTadpolesChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.tadpoles));
 		__tadpolesChange += __handler;
-		if (__immediate && this.tadpoles != null) { __handler(this.tadpoles, null); }
+		if (__immediate && this.tadpoles != default(int)) { __handler(this.tadpoles, default(int)); }
 		return () => {
 			__callbacks.RemovePropertyCallback(nameof(tadpoles));
 			__tadpolesChange -= __handler;
 		};
 	}
 
-	protected event PropertyChangeHandler<ArraySchema<GamePieceState>> __frogsChange;
-	public Action OnFrogsChange(PropertyChangeHandler<ArraySchema<GamePieceState>> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<int> __frogsChange;
+	public Action OnFrogsChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.frogs));
 		__frogsChange += __handler;
-		if (__immediate && this.frogs != null) { __handler(this.frogs, null); }
+		if (__immediate && this.frogs != default(int)) { __handler(this.frogs, default(int)); }
 		return () => {
 			__callbacks.RemovePropertyCallback(nameof(frogs));
 			__frogsChange -= __handler;
@@ -52,8 +97,11 @@ public BoardState() { }
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(tadpoles): __tadpolesChange?.Invoke((ArraySchema<GamePieceState>) change.Value, (ArraySchema<GamePieceState>) change.PreviousValue); break;
-			case nameof(frogs): __frogsChange?.Invoke((ArraySchema<GamePieceState>) change.Value, (ArraySchema<GamePieceState>) change.PreviousValue); break;
+			case nameof(tiles): __tilesChange?.Invoke((ArraySchema<TileState>) change.Value, (ArraySchema<TileState>) change.PreviousValue); break;
+			case nameof(width): __widthChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
+			case nameof(height): __heightChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
+			case nameof(tadpoles): __tadpolesChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
+			case nameof(frogs): __frogsChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			default: break;
 		}
 	}

@@ -25,7 +25,6 @@ public class GameboardManager : MonoBehaviour
     {
       Instance = this;
       DontDestroyOnLoad(gameObject);
-      CreateGameboard();
     }
     else
     {
@@ -42,8 +41,8 @@ public class GameboardManager : MonoBehaviour
     _gamePieceManager = GamePieceManager.Instance;
 
     //Subscribe to events
-    _networkManager.OnTadpolePlaced += PlaceTadpole;
-    _networkManager.OnFrogPlaced += PlaceFrog;
+    _networkManager.OnBoardCreated += CreateGameboard;
+    _networkManager.OnBoardChanged += HandleChange;
   }
 
   private void Update()
@@ -56,83 +55,104 @@ public class GameboardManager : MonoBehaviour
   ----------------------------------------------------------*/
 
   /*---------------------------------------------------------
-  * Place an opponent's tadpole on the game board
+  * Place a tadpole on the game board
   * @param state - The state of the game piece to place
   ----------------------------------------------------------*/
-  private void PlaceTadpole(GamePieceState state)
+  private void PlaceTadpole(int tileX, int tileY, int playerId)
   {
     GameObject prefab;
+    GamePieceType type;
 
-    if (state.playerId == _networkManager.PlayerId)
+    if (playerId == _networkManager.PlayerId)
     {
-      prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientTadpoleType);
+      type = _gamePieceManager.ClientTadpoleType;
     }
     else
     {
-      prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentTadpoleType);
+      type = _gamePieceManager.OpponentTadpoleType;
     }
 
-    GameTile gameTile = GameTiles[state.tile.x, state.tile.y];
+    prefab = _resourceManager.GetPrefab(type);
+
+    GameTile gameTile = GameTiles[tileX, tileY];
 
     GameObject tadpole = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
     PlacedPiece gamePiece = tadpole.AddComponent<PlacedPiece>();
     gamePiece.SetTilePlacement(gameTile);
-    gamePiece.TypeOfPiece = _gamePieceManager.OpponentTadpoleType;
   }
 
   /*---------------------------------------------------------
-  * Place an opponent's frog on the game board
+  * Place a frog on the game board
   * @param state - The state of the game piece to place
   ----------------------------------------------------------*/
-  private void PlaceFrog(GamePieceState state)
+  private void PlaceFrog(int tileX, int tileY, int playerId)
   {
     GameObject prefab;
+    GamePieceType type;
 
-    if (state.playerId == _networkManager.PlayerId)
+    if (playerId == _networkManager.PlayerId)
     {
-      prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientFrogType);
+      type = _gamePieceManager.ClientFrogType;
     }
     else
     {
-      prefab = _resourceManager.GetPrefab(_gamePieceManager.OpponentFrogType);
+      type = _gamePieceManager.OpponentFrogType;
     }
 
-    GameTile gameTile = GameTiles[state.tile.x, state.tile.y];
+    prefab = _resourceManager.GetPrefab(type);
+
+    GameTile gameTile = GameTiles[tileX, tileY];
 
     GameObject frog = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
     PlacedPiece gamePiece = frog.AddComponent<PlacedPiece>();
     gamePiece.SetTilePlacement(gameTile);
-    gamePiece.TypeOfPiece = _gamePieceManager.OpponentFrogType;
   }
 
   /*---------------------------------------------------------
-  * Create a game board with the specified width and height
-  * @param width - The width of the game board
-  * @param height - The height of the game board
-  * @param tileSize - The size of each tile in the game board
+  * Create the game board from the server
   ----------------------------------------------------------*/
-  private void CreateGameboard(int width = 6, int height = 6, float tileSize = 0.65f)
+  private void CreateGameboard(BoardState state)
   {
-    GameTiles = new GameTile[width, height];
+    Debug.Log("Creating game board");
+    float tileSize = 0.65f;
+    GameTiles = new GameTile[state.width, state.height];
 
-    float boardWidth = width * tileSize;
-    float boardHeight = height * tileSize;
+    float boardWidth = state.width * tileSize;
+    float boardHeight = state.height * tileSize;
 
     float startX = -boardWidth / 2 + tileSize / 2;
     float startY = -boardHeight / 2 + tileSize / 2;
 
-    for (int x = 0; x < width; x++)
+    state.tiles.ForEach((tile) =>
     {
-      for (int y = 0; y < height; y++)
+      GameTile gameTile = Instantiate(_gameTilePrefab, new Vector3(startX + tile.x * tileSize, startY + tile.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
+      gameTile.ArrayPosition = new Vector2Int(tile.x, tile.y);
+
+      GameTiles[tile.x, tile.y] = gameTile;
+    });
+
+    _networkManager.InitializeTileListener();
+  }
+
+  private void HandleChange(BoardState state)
+  {
+    // Place pieces on the board
+    state.tiles.ForEach((tile) =>
+    {
+      GameTile gameTile = GameTiles[tile.x, tile.y];
+
+      if (tile.gamePiece != null && gameTile.CurrentlyHeldPiece == null)
       {
-        GameObject newTile = Instantiate(_gameTilePrefab, new Vector3(startX + x * tileSize, startY + y * tileSize, 0), Quaternion.identity);
-        GameTile gameTile = newTile.GetComponent<GameTile>();
-
-        gameTile.ArrayPosition = new Vector2Int(x, y);
-
-        GameTiles[x, y] = gameTile;
+        if (tile.gamePiece.type == "tadpole")
+        {
+          PlaceTadpole(tile.x, tile.y, tile.gamePiece.playerId);
+        }
+        else if (tile.gamePiece.type == "frog")
+        {
+          PlaceFrog(tile.x, tile.y, tile.gamePiece.playerId);
+        }
       }
-    }
+    });
   }
 
   /*------------------------------------------------------------------------------------------

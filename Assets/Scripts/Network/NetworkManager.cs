@@ -14,10 +14,13 @@ public class NetworkManager : MonoBehaviour
 
   /* Events */
   public event Action<GameState> OnRoomCreated; //Event that is triggered when the room is created
+  public event Action<BoardState> OnBoardCreated; //Event that is triggered when the board state changes
+  public event Action<BoardState> OnBoardChanged; //Event that is triggered when the board state changes
   public event Action<GamePieceState> OnTadpolePlaced; //Event that is triggered when the game state changes
   public event Action<GamePieceState> OnFrogPlaced; //Event that is triggered when the game state changes
 
   /* Private variables */
+  private bool _boardCreated = false;
   private ColyseusClient _client; //Reference to the Colyseus client
   private ColyseusRoom<GameState> _room; //Reference to the Game room
   private UIManager _uiManager; //Reference to the UIManager
@@ -84,26 +87,6 @@ public class NetworkManager : MonoBehaviour
     GamePieceManager.Instance.SetTadpoleType(PlayerId);
   }
 
-  /*------------------------------------------------
-  * Send a message to the server to place a tadpole
-  * @param gamePieceState - The game piece state
-  --------------------------------------------------*/
-  public async void SendTadpolePlacement(GamePieceState gamePieceState)
-  {
-    NullCheckRoom();
-    await _room.Send("placeTadpole", gamePieceState);
-  }
-
-  /*------------------------------------------------
-  * Send a message to the server to place a frog
-  * @param gamePieceState - The game piece state
-  --------------------------------------------------*/
-  public async void SendFrogPlacement(GamePieceState gamePieceState)
-  {
-    NullCheckRoom();
-    await _room.Send("placeFrog", gamePieceState);
-  }
-
   /*-------------------------------
   * Initialize the Colyseus client
   ---------------------------------*/
@@ -122,19 +105,36 @@ public class NetworkManager : MonoBehaviour
     /*-------------------------------------------
     * Trigger events when the game state changes
     ---------------------------------------------*/
-    _room.OnMessage<GameState>("roomCreated", (message) =>
+    _room.State.board.OnChange(() =>
     {
-      OnRoomCreated?.Invoke(message);
-    });
-    _room.OnMessage<GamePieceState>("tadpolePlaced", (message) =>
-    {
-      OnTadpolePlaced?.Invoke(message);
+      if (_room.State.board == null) return;
+
+      if (!_boardCreated)
+      {
+        _boardCreated = true;
+        OnBoardCreated?.Invoke(_room.State.board);
+      }
+      
     });
 
-    _room.OnMessage<GamePieceState>("frogPlaced", (message) =>
+    
+  }
+
+  public void InitializeTileListener()
+  {
+    _room.State.board.tiles.ForEach(tile =>
     {
-      OnFrogPlaced?.Invoke(message);
+      tile.OnChange(() =>
+      {
+        OnBoardChanged?.Invoke(_room.State.board);
+      });
     });
+  }
+
+  public void PlacePiece(int x, int y, string type)
+  {
+    if (NullCheckRoom()) return;
+    _room.Send("placePiece", new { x, y, type, playerId = PlayerId });
   }
 
   /*------------------
@@ -142,7 +142,7 @@ public class NetworkManager : MonoBehaviour
   --------------------*/
   private void GetClientId()
   {
-    NullCheckRoom();
+    if (NullCheckRoom()) return;
     ClientId = _room.SessionId;
   }
 
@@ -151,20 +151,20 @@ public class NetworkManager : MonoBehaviour
   --------------------*/
   private void GetRoomId()
   {
-    NullCheckRoom();
+    if (NullCheckRoom()) return;
     RoomId = _room.RoomId;
   }
 
   /*--------------------------
   * Check if the room is null
   ----------------------------*/
-  private void NullCheckRoom()
+  private bool NullCheckRoom()
   {
     if (_room == null)
     {
       Debug.LogError("Room is null");
-      return;
+      return true;
     }
+    return false;
   }
-
 }

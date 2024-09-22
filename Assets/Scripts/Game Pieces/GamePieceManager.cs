@@ -64,7 +64,6 @@ public class GamePieceManager : MonoBehaviour
   {
     if (playerId == 1)
     {
-      Debug.Log("Setting frog type to orange");
       ClientFrogType = GamePieceType.OrangeFrog;
       OpponentFrogType = GamePieceType.PurpleFrog;
     }

@@ -22,7 +22,10 @@ public GameState() { }
 	[Type(1, "ref", typeof(PlayerState))]
 	public PlayerState playerTwo = new PlayerState();
 
-	[Type(2, "ref", typeof(BoardState))]
+	[Type(2, "int32")]
+	public int currentPlayer = default(int);
+
+	[Type(3, "ref", typeof(BoardState))]
 	public BoardState board = new BoardState();
 
 	/*
@@ -53,6 +56,18 @@ public GameState() { }
 		};
 	}
 
+	protected event PropertyChangeHandler<int> __currentPlayerChange;
+	public Action OnCurrentPlayerChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.currentPlayer));
+		__currentPlayerChange += __handler;
+		if (__immediate && this.currentPlayer != default(int)) { __handler(this.currentPlayer, default(int)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(currentPlayer));
+			__currentPlayerChange -= __handler;
+		};
+	}
+
 	protected event PropertyChangeHandler<BoardState> __boardChange;
 	public Action OnBoardChange(PropertyChangeHandler<BoardState> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
@@ -69,6 +84,7 @@ public GameState() { }
 		switch (change.Field) {
 			case nameof(playerOne): __playerOneChange?.Invoke((PlayerState) change.Value, (PlayerState) change.PreviousValue); break;
 			case nameof(playerTwo): __playerTwoChange?.Invoke((PlayerState) change.Value, (PlayerState) change.PreviousValue); break;
+			case nameof(currentPlayer): __currentPlayerChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			case nameof(board): __boardChange?.Invoke((BoardState) change.Value, (BoardState) change.PreviousValue); break;
 			default: break;
 		}

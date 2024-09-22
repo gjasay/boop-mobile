@@ -84,19 +84,11 @@ public class DragHandler : MonoBehaviour
 
       if (TypeOfPiece == GamePieceType.OrangeTadpole || TypeOfPiece == GamePieceType.PurpleTadpole)
       {
-        networkManager.SendTadpolePlacement(new GamePieceState
-        {
-          tile = { x = gameTile.ArrayPosition.x, y = gameTile.ArrayPosition.y },
-          playerId = networkManager.PlayerId,
-        });
+        networkManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, "tadpole");
       }
       else
       {
-        networkManager.SendFrogPlacement(new GamePieceState
-        {
-          tile = { x = gameTile.ArrayPosition.x, y = gameTile.ArrayPosition.y },
-          playerId = networkManager.PlayerId,
-        });
+        networkManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, "frog");
       }
     }
 
