@@ -8,6 +8,13 @@ export class GamePieceState extends Schema
 {
   @type("string") type: string; // "tadpole" or "frog"
   @type("int32") playerId: number; // 1 or 2
+
+  constructor(type: string = null, playerId: number = null)
+  {
+    super();
+    this.type = type;
+    this.playerId = playerId;
+  }
 }
 
 export class TileState extends Schema

@@ -18,6 +18,7 @@ public class NetworkManager : MonoBehaviour
   public event Action<BoardState> OnBoardChanged; //Event that is triggered when the board state changes
   public event Action<GamePieceState> OnTadpolePlaced; //Event that is triggered when the game state changes
   public event Action<GamePieceState> OnFrogPlaced; //Event that is triggered when the game state changes
+  public event Action<HandState> OnUIChanged; //Event that is triggered when the UI state changes
 
   /* Private variables */
   private bool _boardCreated = false;
@@ -63,6 +64,7 @@ public class NetworkManager : MonoBehaviour
     _uiManager.SetRoomCode(RoomId);
 
     PlayerId = 1;
+    InitializeUIListener();
     GamePieceManager.Instance.SetFrogType(PlayerId);
     GamePieceManager.Instance.SetTadpoleType(PlayerId);
   }
@@ -83,6 +85,7 @@ public class NetworkManager : MonoBehaviour
     _uiManager.DisableRoomCodeText();
 
     PlayerId = 2;
+    InitializeUIListener();
     GamePieceManager.Instance.SetFrogType(PlayerId);
     GamePieceManager.Instance.SetTadpoleType(PlayerId);
   }
@@ -117,9 +120,11 @@ public class NetworkManager : MonoBehaviour
       
     });
 
-    
   }
 
+  /*-------------------------------------------
+  * Initialize the tile listener
+  ---------------------------------------------*/
   public void InitializeTileListener()
   {
     _room.State.board.tiles.ForEach(tile =>
@@ -131,10 +136,41 @@ public class NetworkManager : MonoBehaviour
     });
   }
 
+  /*-------------------------------------------
+  * Request to place a tadpole on the board
+  * @param x - The x position of the piece
+  * @param y - The y position of the piece
+  * @param type - The type of the piece (tadpole or frog)
+  ---------------------------------------------*/
   public void PlacePiece(int x, int y, string type)
   {
     if (NullCheckRoom()) return;
     _room.Send("placePiece", new { x, y, type, playerId = PlayerId });
+  }
+
+  private void InitializeUIListener()
+  {
+    Debug.Log("Initializing UI Listener");
+    if (NullCheckRoom()) return;
+    Debug.Log("Room is not null");
+    if (PlayerId == 1)
+    {
+      _room.State.playerOne.hand.OnChange(() =>
+      {
+        OnUIChanged?.Invoke(_room.State.playerOne.hand);
+      });
+    }
+    else if (PlayerId == 2)
+    {
+      _room.State.playerTwo.hand.OnChange(() =>
+      {
+        OnUIChanged?.Invoke(_room.State.playerTwo.hand);
+      });
+    }
+    else
+    {
+      Debug.LogError("Player id is not set");
+    }
   }
 
   /*------------------

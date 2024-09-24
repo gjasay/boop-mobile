@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GameboardManager : MonoBehaviour
@@ -151,6 +152,10 @@ public class GameboardManager : MonoBehaviour
         {
           PlaceFrog(tile.x, tile.y, tile.gamePiece.playerId);
         }
+      }
+      else if (tile.gamePiece == null && gameTile.CurrentlyHeldPiece != null)
+      {
+        Destroy(gameTile.CurrentlyHeldPiece.gameObject);
       }
     });
   }

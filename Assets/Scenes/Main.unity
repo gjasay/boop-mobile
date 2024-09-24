@@ -1227,6 +1227,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _roomCodeText: {fileID: 442920031}
   _roomCodeInput: {fileID: 0}
+  _numberOfFrogs: {fileID: 1564616997}
+  _numberOfTadpoles: {fileID: 225014293}
 --- !u!1 &1900474343
 GameObject:
   m_ObjectHideFlags: 0
