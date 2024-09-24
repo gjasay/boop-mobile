@@ -33,8 +33,15 @@ export class HandState extends Schema
 
 export class PlayerState extends Schema
 {
+  @type("int32") id: number;
   @type("string") sessionId: string;
   @type(HandState) hand = new HandState();
+
+  constructor(id: number)
+  {
+    super();
+    this.id = id;
+  }
 }
 
 export class BoardState extends Schema
@@ -48,8 +55,8 @@ export class BoardState extends Schema
 
 export class GameState extends Schema
 {
-  @type(PlayerState) playerOne = new PlayerState();
-  @type(PlayerState) playerTwo = new PlayerState();
+  @type(PlayerState) playerOne = new PlayerState(1);
+  @type(PlayerState) playerTwo = new PlayerState(2);
   @type("int32") currentPlayer = 1;
   @type(BoardState) board = new BoardState();
 }

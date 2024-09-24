@@ -16,15 +16,30 @@ public partial class PlayerState : Schema {
 [Preserve] 
 #endif
 public PlayerState() { }
-	[Type(0, "string")]
+	[Type(0, "int32")]
+	public int id = default(int);
+
+	[Type(1, "string")]
 	public string sessionId = default(string);
 
-	[Type(1, "ref", typeof(HandState))]
+	[Type(2, "ref", typeof(HandState))]
 	public HandState hand = new HandState();
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
+
+	protected event PropertyChangeHandler<int> __idChange;
+	public Action OnIdChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.id));
+		__idChange += __handler;
+		if (__immediate && this.id != default(int)) { __handler(this.id, default(int)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(id));
+			__idChange -= __handler;
+		};
+	}
 
 	protected event PropertyChangeHandler<string> __sessionIdChange;
 	public Action OnSessionIdChange(PropertyChangeHandler<string> __handler, bool __immediate = true) {
@@ -52,6 +67,7 @@ public PlayerState() { }
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
+			case nameof(id): __idChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			case nameof(sessionId): __sessionIdChange?.Invoke((string) change.Value, (string) change.PreviousValue); break;
 			case nameof(hand): __handChange?.Invoke((HandState) change.Value, (HandState) change.PreviousValue); break;
 			default: break;

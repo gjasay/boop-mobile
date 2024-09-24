@@ -123,23 +123,84 @@ export class MyRoom extends Room<GameState>
     let piece = new GamePieceState(type, playerId);
     tile.gamePiece = piece;
 
-    const directions: Vector2[] = [new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1), new Vector2(-1, 0), new Vector2(1, 1), new Vector2(-1, -1), new Vector2(1, -1), new Vector2(-1, 1)];
-    const neighbors: TileState[] = directions.map((dir) => this.state.board.tiles.find((t) => t.x === tile.x + dir.x && t.y === tile.y + dir.y)).filter((t) => t !== undefined);
+    const player = playerId === 1 ? this.state.playerOne : playerId === 2 ? this.state.playerTwo : null;
+    //Get the first neighbors of the tile
+    const firstNeighbors: TileState[] = this.checkForNeighbors(tile);
 
-    neighbors.forEach((neighbor) => {
+    firstNeighbors.forEach((neighbor) =>
+    {
       if (neighbor.gamePiece !== null) {
         console.log(`Neighbor at (${neighbor.x}, ${neighbor.y})`);
 
         const direction = new Vector2(neighbor.x - tile.x, neighbor.y - tile.y);
         const nextTile = this.state.board.tiles.find((t) => t.x === neighbor.x + direction.x && t.y === neighbor.y + direction.y);
+
+        if (!nextTile) return;
+
         if (nextTile && nextTile.gamePiece === null) {
           nextTile.gamePiece = neighbor.gamePiece;
           neighbor.gamePiece = null;
+        }
+
+        /*--------------------------------------------------------------------------------------------------
+        * Two differnt possible approaches here to check for three in a row of same piece type
+        * I need to check these after the piece has been placed and movement has been resolved
+        * Approach 1: The entire gameboard checks for three in a row
+        * Approach 2: Only the neighbors of the placed piece and the placed piece check for three in a row
+        * which approach is better chatGPT? 
+        * I think approach 2 is better because it is more efficient
+        * TODO: Create a method to check for three in a row
+        * TODO: Implement the method in the setPieceOnTile method
+        ----------------------------------------------------------------------------------------------------*/
+
+        if (neighbor.gamePiece?.playerId === nextTile.gamePiece?.playerId && neighbor.gamePiece?.playerId === tile.gamePiece?.playerId) {
+
+          switch (neighbor.gamePiece.type && nextTile.gamePiece.type && tile.gamePiece.type) {
+            case "tadpole":
+              neighbor.gamePiece = null;
+              nextTile.gamePiece = null;
+              tile.gamePiece = null;
+              player.hand.frogs += 3;
+              break;
+            case "frog":
+              neighbor.gamePiece = null;
+              nextTile.gamePiece = null;
+              tile.gamePiece = null;
+              player.hand.tadpoles += 3;
+              break;
+          }
         }
       }
     });
 
     console.log("Piece placed successfully!");
+  }
+
+  /*---------------------------------------------------------
+  * Check for neighbors of a tile
+  * @param tile: The tile to check for neighbors
+  * @returns An array of neighboring tiles
+  ----------------------------------------------------------*/
+  checkForNeighbors(tile: TileState): TileState[] | null
+  {
+    const directions: Vector2[] = [new Vector2(0, 1), new Vector2(1, 0), new Vector2(0, -1), new Vector2(-1, 0), new Vector2(1, 1), new Vector2(-1, -1), new Vector2(1, -1), new Vector2(-1, 1)];
+
+    return directions.map((dir) =>
+    {
+      return this.state.board.tiles.find((t) => t.x === tile.x + dir.x && t.y === tile.y + dir.y);
+    }).filter((t) => t !== undefined);
+  }
+
+  /*---------------------------------------------------------------
+  * Check if array of tiles contains the same type of game piece
+  * @param tiles: The array of tiles to check
+  * @returns True if all tiles contain the same type of game piece
+  -----------------------------------------------------------------*/
+  checkForSameType(tiles: TileState[]): boolean
+  {
+    const firstPiece = tiles[0].gamePiece;
+
+    return tiles.every((tile) => tile.gamePiece.type === firstPiece.type);
   }
 
   /*-------------Colyseus Room Lifecycle Functions-----------------*/
