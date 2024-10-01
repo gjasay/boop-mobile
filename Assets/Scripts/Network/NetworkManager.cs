@@ -76,7 +76,7 @@ public class NetworkManager : MonoBehaviour
   ----------------------------------------------*/
   public async Task JoinRoom(string roomId)
   {
-    _room = await _client.JoinById<GameState>(roomId); //Join a colyseus room
+    _room = await _client.JoinOrCreate<GameState>("my_room"); //Join a colyseus room
     RegisterRoomHandlers(); //Register the room handlers
 
     GetClientId();

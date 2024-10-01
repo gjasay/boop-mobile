@@ -1,4 +1,5 @@
 using System;
+using SchemaTest.InstanceSharingTypes;
 using UnityEngine;
 
 public class GameboardManager : MonoBehaviour
@@ -126,10 +127,11 @@ public class GameboardManager : MonoBehaviour
 
     state.tiles.ForEach((tile) =>
     {
-      GameTile gameTile = Instantiate(_gameTilePrefab, new Vector3(startX + tile.x * tileSize, startY + tile.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
-      gameTile.ArrayPosition = new Vector2Int(tile.x, tile.y);
+      PositionState position = tile.position;
+      GameTile gameTile = Instantiate(_gameTilePrefab, new Vector3(startX + position.x * tileSize, startY + position.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
+      gameTile.ArrayPosition = new Vector2Int(position.x, position.y);
 
-      GameTiles[tile.x, tile.y] = gameTile;
+      GameTiles[position.x, position.y] = gameTile;
     });
 
     _networkManager.InitializeTileListener();
@@ -140,17 +142,18 @@ public class GameboardManager : MonoBehaviour
     // Place pieces on the board
     state.tiles.ForEach((tile) =>
     {
-      GameTile gameTile = GameTiles[tile.x, tile.y];
+      PositionState position = tile.position;
+      GameTile gameTile = GameTiles[position.x, position.y];
 
       if (tile.gamePiece != null && gameTile.CurrentlyHeldPiece == null)
       {
         if (tile.gamePiece.type == "tadpole")
         {
-          PlaceTadpole(tile.x, tile.y, tile.gamePiece.playerId);
+          PlaceTadpole(position.x, position.y, tile.gamePiece.playerId);
         }
         else if (tile.gamePiece.type == "frog")
         {
-          PlaceFrog(tile.x, tile.y, tile.gamePiece.playerId);
+          PlaceFrog(position.x, position.y, tile.gamePiece.playerId);
         }
       }
       else if (tile.gamePiece == null && gameTile.CurrentlyHeldPiece != null)

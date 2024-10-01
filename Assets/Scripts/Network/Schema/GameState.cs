@@ -28,6 +28,9 @@ public GameState() { }
 	[Type(3, "ref", typeof(BoardState))]
 	public BoardState board = new BoardState();
 
+	[Type(4, "int32")]
+	public int winner = default(int);
+
 	/*
 	 * Support for individual property change callbacks below...
 	 */
@@ -80,12 +83,25 @@ public GameState() { }
 		};
 	}
 
+	protected event PropertyChangeHandler<int> __winnerChange;
+	public Action OnWinnerChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.winner));
+		__winnerChange += __handler;
+		if (__immediate && this.winner != default(int)) { __handler(this.winner, default(int)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(winner));
+			__winnerChange -= __handler;
+		};
+	}
+
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(playerOne): __playerOneChange?.Invoke((PlayerState) change.Value, (PlayerState) change.PreviousValue); break;
 			case nameof(playerTwo): __playerTwoChange?.Invoke((PlayerState) change.Value, (PlayerState) change.PreviousValue); break;
 			case nameof(currentPlayer): __currentPlayerChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			case nameof(board): __boardChange?.Invoke((BoardState) change.Value, (BoardState) change.PreviousValue); break;
+			case nameof(winner): __winnerChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			default: break;
 		}
 	}
