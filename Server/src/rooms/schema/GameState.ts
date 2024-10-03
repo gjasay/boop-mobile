@@ -76,8 +76,6 @@ export class BoardState extends Schema
   @type ([TileState]) tiles = new ArraySchema<TileState>();
   @type("int32") width = 6;
   @type("int32") height = 6;
-  @type("int32") tadpoles = 0;
-  @type("int32") frogs = 0;
 }
 
 export class GameState extends Schema

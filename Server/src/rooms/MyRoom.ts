@@ -24,12 +24,6 @@ export class MyRoom extends Room<GameState>
     this.onMessage("placePiece", (_client: Client, msg: PieceMessage) => handlePlacementRequest(this.state, msg.x, msg.y, msg.type, msg.playerId));
   }
 
-  
-
-  
-
-  
-
   /*-------------Colyseus Room Lifecycle Functions-----------------*/
   onJoin(client: Client, options: any)
   {
