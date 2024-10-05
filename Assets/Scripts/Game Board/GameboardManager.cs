@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using SchemaTest.InstanceSharingTypes;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameboardManager : MonoBehaviour
@@ -7,7 +9,6 @@ public class GameboardManager : MonoBehaviour
   public static GameboardManager Instance { get; private set; } //Singleton instance
 
   //Properties
-  public GameTile SelectedGameTile { get; set; } // The currently selected game tile
   public GameTile LastTouchedGameTile { get; set; } // The last touched game tile
   public bool CurrentlyTouchingGameBoard { get; private set; } // True if the player is currently touching the game board
   public GameTile[,] GameTiles { get; private set; } //2D array of GameTile objects
@@ -55,6 +56,29 @@ public class GameboardManager : MonoBehaviour
   /*---------------------------------------------------------
   * Network event handlers
   ----------------------------------------------------------*/
+  public void SelectTadpoleToEvolve()
+  {
+    Debug.Log("Choose piece to evolve");
+    LastTouchedGameTile = null;
+
+    StartCoroutine(SendEvolvingTadpole());
+  }
+
+  private IEnumerator SendEvolvingTadpole()
+  {
+    yield return new WaitUntil(() => LastTouchedGameTile != null);
+
+    if (LastTouchedGameTile.CurrentlyHeldPiece.pieceType == "tadpole")
+    {
+      Debug.Log(LastTouchedGameTile.ArrayPosition.x + " " + LastTouchedGameTile.ArrayPosition.y);
+      _networkManager.SendEvolvingTadpole(LastTouchedGameTile.ArrayPosition.x, LastTouchedGameTile.ArrayPosition.y);
+    }
+    else
+    {
+      Debug.Log("Not a tadpole");
+      SelectTadpoleToEvolve();
+    }
+  }
 
   /*---------------------------------------------------------
   * Place a tadpole on the game board
@@ -80,7 +104,7 @@ public class GameboardManager : MonoBehaviour
 
     GameObject tadpole = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
     PlacedPiece gamePiece = tadpole.AddComponent<PlacedPiece>();
-    gamePiece.SetTilePlacement(gameTile);
+    gamePiece.SetTilePlacement(gameTile, "tadpole");
   }
 
   /*---------------------------------------------------------
@@ -107,7 +131,7 @@ public class GameboardManager : MonoBehaviour
 
     GameObject frog = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
     PlacedPiece gamePiece = frog.AddComponent<PlacedPiece>();
-    gamePiece.SetTilePlacement(gameTile);
+    gamePiece.SetTilePlacement(gameTile, "frog");
   }
 
   /*---------------------------------------------------------

@@ -25,6 +25,7 @@ public class NetworkManager : MonoBehaviour
   private ColyseusClient _client; //Reference to the Colyseus client
   private ColyseusRoom<GameState> _room; //Reference to the Game room
   private UIManager _uiManager; //Reference to the UIManager
+  private GameboardManager _gameboardManager; //Reference to the GameboardManager
 
   private void Awake()
   {
@@ -43,6 +44,7 @@ public class NetworkManager : MonoBehaviour
   private void Start()
   {
     _uiManager = GameObject.Find("UI").GetComponent<UIManager>();
+    _gameboardManager = GameboardManager.Instance;
 
     //Test
   }
@@ -117,9 +119,22 @@ public class NetworkManager : MonoBehaviour
         _boardCreated = true;
         OnBoardCreated?.Invoke(_room.State.board);
       }
-      
     });
 
+    /*--------------------------
+    * Messages from the server
+    ----------------------------*/
+    _room.OnMessage<string>("choosePieceToEvolve", (_msg) =>
+    {
+      _gameboardManager.SelectTadpoleToEvolve();
+    });
+
+  }
+
+  public void SendEvolvingTadpole(int x, int y)
+  {
+    if (NullCheckRoom()) return;
+    _room.Send("evolveTadpole", new { x, y, playerId = PlayerId });
   }
 
   /*-------------------------------------------
