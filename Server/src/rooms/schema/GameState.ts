@@ -5,20 +5,7 @@ import { Vector2 } from "../utils/Vector2";
  * Schema Definitions
  --------------------*/
 
-export class GamePieceState extends Schema
-{
-  @type("string") type: string; // "tadpole" or "frog"
-  @type("int32") playerId: number; // 1 or 2
-
-  constructor(type: string = null, playerId: number = null)
-  {
-    super();
-    this.type = type;
-    this.playerId = playerId;
-  }
-}
-
-export class PositionState extends Schema
+export class ArrayCoordinate extends Schema
 {
   @type("int32") x: number;
   @type("int32") y: number;
@@ -31,25 +18,55 @@ export class PositionState extends Schema
   }
 }
 
+export class TransformPosition extends Schema
+{
+  @type("float32") x: number;
+  @type("float32") y: number;
+
+  constructor(x: number = 0, y: number = 0)
+  {
+    super();
+    this.x = x;
+    this.y = y;
+  }
+}
+
+export class GamePieceState extends Schema
+{
+  @type("string") type: string; // "tadpole" or "frog"
+  @type("int32") playerId: number; // 1 or 2
+  @type(ArrayCoordinate) priorCoordinate: ArrayCoordinate = new ArrayCoordinate();
+  @type(TransformPosition) position: TransformPosition = new TransformPosition();
+
+  constructor(position: TransformPosition = new TransformPosition(), type: string = null, playerId: number = null)
+  {
+    super();
+    this.position = position;
+    this.type = type;
+    this.playerId = playerId;
+  }
+}
+
 export class NeighborState extends Schema
 {
-  @type(PositionState) up: PositionState = null;
-  @type(PositionState) down: PositionState = null;
-  @type(PositionState) left: PositionState = null;
-  @type(PositionState) right: PositionState = null;
-  @type(PositionState) upLeft: PositionState = null;
-  @type(PositionState) upRight: PositionState = null;
-  @type(PositionState) downLeft: PositionState = null;
-  @type(PositionState) downRight: PositionState = null;
+  @type(ArrayCoordinate) up: ArrayCoordinate = null;
+  @type(ArrayCoordinate) down: ArrayCoordinate = null;
+  @type(ArrayCoordinate) left: ArrayCoordinate = null;
+  @type(ArrayCoordinate) right: ArrayCoordinate = null;
+  @type(ArrayCoordinate) upLeft: ArrayCoordinate = null;
+  @type(ArrayCoordinate) upRight: ArrayCoordinate = null;
+  @type(ArrayCoordinate) downLeft: ArrayCoordinate = null;
+  @type(ArrayCoordinate) downRight: ArrayCoordinate = null;
 }
 
 export class TileState extends Schema
 {
-  @type(GamePieceState) gamePiece: GamePieceState = null;
+  @type(GamePieceState) gamePiece: GamePieceState = new GamePieceState();
   //These represent the position of the tile in the 2D array
-  @type (PositionState) position = { x: 0, y: 0 };
+  @type (ArrayCoordinate) arrayPosition = new ArrayCoordinate();
+  @type (TransformPosition) position = new TransformPosition();
   @type (NeighborState) neighbor = new NeighborState();
-  @type ([PositionState]) neighbors = new ArraySchema<PositionState>();
+  @type ([ArrayCoordinate]) neighbors = new ArraySchema<ArrayCoordinate>();
 }
 
 export class HandState extends Schema

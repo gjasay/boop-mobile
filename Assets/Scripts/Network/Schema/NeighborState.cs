@@ -16,36 +16,36 @@ public partial class NeighborState : Schema {
 [Preserve] 
 #endif
 public NeighborState() { }
-	[Type(0, "ref", typeof(PositionState))]
-	public PositionState up = new PositionState();
+	[Type(0, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate up = new ArrayCoordinate();
 
-	[Type(1, "ref", typeof(PositionState))]
-	public PositionState down = new PositionState();
+	[Type(1, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate down = new ArrayCoordinate();
 
-	[Type(2, "ref", typeof(PositionState))]
-	public PositionState left = new PositionState();
+	[Type(2, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate left = new ArrayCoordinate();
 
-	[Type(3, "ref", typeof(PositionState))]
-	public PositionState right = new PositionState();
+	[Type(3, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate right = new ArrayCoordinate();
 
-	[Type(4, "ref", typeof(PositionState))]
-	public PositionState upLeft = new PositionState();
+	[Type(4, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate upLeft = new ArrayCoordinate();
 
-	[Type(5, "ref", typeof(PositionState))]
-	public PositionState upRight = new PositionState();
+	[Type(5, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate upRight = new ArrayCoordinate();
 
-	[Type(6, "ref", typeof(PositionState))]
-	public PositionState downLeft = new PositionState();
+	[Type(6, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate downLeft = new ArrayCoordinate();
 
-	[Type(7, "ref", typeof(PositionState))]
-	public PositionState downRight = new PositionState();
+	[Type(7, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate downRight = new ArrayCoordinate();
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<PositionState> __upChange;
-	public Action OnUpChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __upChange;
+	public Action OnUpChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.up));
 		__upChange += __handler;
@@ -56,8 +56,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __downChange;
-	public Action OnDownChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __downChange;
+	public Action OnDownChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.down));
 		__downChange += __handler;
@@ -68,8 +68,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __leftChange;
-	public Action OnLeftChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __leftChange;
+	public Action OnLeftChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.left));
 		__leftChange += __handler;
@@ -80,8 +80,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __rightChange;
-	public Action OnRightChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __rightChange;
+	public Action OnRightChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.right));
 		__rightChange += __handler;
@@ -92,8 +92,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __upLeftChange;
-	public Action OnUpLeftChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __upLeftChange;
+	public Action OnUpLeftChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.upLeft));
 		__upLeftChange += __handler;
@@ -104,8 +104,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __upRightChange;
-	public Action OnUpRightChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __upRightChange;
+	public Action OnUpRightChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.upRight));
 		__upRightChange += __handler;
@@ -116,8 +116,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __downLeftChange;
-	public Action OnDownLeftChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __downLeftChange;
+	public Action OnDownLeftChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.downLeft));
 		__downLeftChange += __handler;
@@ -128,8 +128,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __downRightChange;
-	public Action OnDownRightChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __downRightChange;
+	public Action OnDownRightChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.downRight));
 		__downRightChange += __handler;
@@ -142,14 +142,14 @@ public NeighborState() { }
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(up): __upChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(down): __downChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(left): __leftChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(right): __rightChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(upLeft): __upLeftChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(upRight): __upRightChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(downLeft): __downLeftChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
-			case nameof(downRight): __downRightChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
+			case nameof(up): __upChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(down): __downChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(left): __leftChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(right): __rightChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(upLeft): __upLeftChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(upRight): __upRightChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(downLeft): __downLeftChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(downRight): __downRightChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
 			default: break;
 		}
 	}

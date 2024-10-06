@@ -19,14 +19,17 @@ public TileState() { }
 	[Type(0, "ref", typeof(GamePieceState))]
 	public GamePieceState gamePiece = new GamePieceState();
 
-	[Type(1, "ref", typeof(PositionState))]
-	public PositionState position = new PositionState();
+	[Type(1, "ref", typeof(ArrayCoordinate))]
+	public ArrayCoordinate arrayPosition = new ArrayCoordinate();
 
-	[Type(2, "ref", typeof(NeighborState))]
+	[Type(2, "ref", typeof(TransformPosition))]
+	public TransformPosition position = new TransformPosition();
+
+	[Type(3, "ref", typeof(NeighborState))]
 	public NeighborState neighbor = new NeighborState();
 
-	[Type(3, "array", typeof(ArraySchema<PositionState>))]
-	public ArraySchema<PositionState> neighbors = new ArraySchema<PositionState>();
+	[Type(4, "array", typeof(ArraySchema<ArrayCoordinate>))]
+	public ArraySchema<ArrayCoordinate> neighbors = new ArraySchema<ArrayCoordinate>();
 
 	/*
 	 * Support for individual property change callbacks below...
@@ -44,8 +47,20 @@ public TileState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<PositionState> __positionChange;
-	public Action OnPositionChange(PropertyChangeHandler<PositionState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArrayCoordinate> __arrayPositionChange;
+	public Action OnArrayPositionChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.arrayPosition));
+		__arrayPositionChange += __handler;
+		if (__immediate && this.arrayPosition != null) { __handler(this.arrayPosition, null); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(arrayPosition));
+			__arrayPositionChange -= __handler;
+		};
+	}
+
+	protected event PropertyChangeHandler<TransformPosition> __positionChange;
+	public Action OnPositionChange(PropertyChangeHandler<TransformPosition> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.position));
 		__positionChange += __handler;
@@ -68,8 +83,8 @@ public TileState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArraySchema<PositionState>> __neighborsChange;
-	public Action OnNeighborsChange(PropertyChangeHandler<ArraySchema<PositionState>> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArraySchema<ArrayCoordinate>> __neighborsChange;
+	public Action OnNeighborsChange(PropertyChangeHandler<ArraySchema<ArrayCoordinate>> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.neighbors));
 		__neighborsChange += __handler;
@@ -83,9 +98,10 @@ public TileState() { }
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(gamePiece): __gamePieceChange?.Invoke((GamePieceState) change.Value, (GamePieceState) change.PreviousValue); break;
-			case nameof(position): __positionChange?.Invoke((PositionState) change.Value, (PositionState) change.PreviousValue); break;
+			case nameof(arrayPosition): __arrayPositionChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(position): __positionChange?.Invoke((TransformPosition) change.Value, (TransformPosition) change.PreviousValue); break;
 			case nameof(neighbor): __neighborChange?.Invoke((NeighborState) change.Value, (NeighborState) change.PreviousValue); break;
-			case nameof(neighbors): __neighborsChange?.Invoke((ArraySchema<PositionState>) change.Value, (ArraySchema<PositionState>) change.PreviousValue); break;
+			case nameof(neighbors): __neighborsChange?.Invoke((ArraySchema<ArrayCoordinate>) change.Value, (ArraySchema<ArrayCoordinate>) change.PreviousValue); break;
 			default: break;
 		}
 	}

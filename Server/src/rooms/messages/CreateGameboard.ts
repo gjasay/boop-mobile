@@ -1,4 +1,4 @@
-import { GameState, PositionState, TileState } from "../schema/GameState";
+import { GameState, ArrayCoordinate, TileState } from "../schema/GameState";
 import { Vector2 } from "../utils/Vector2";
 
 /*-------------------------------------
@@ -15,7 +15,8 @@ export function createGameboard(state: GameState)
   for (let y = 0; y < board.height; y++) {
     for (let x = 0; x < board.width; x++) {
       let tile = new TileState();
-      tile.position = new PositionState(x, y);
+      tile.arrayPosition = new ArrayCoordinate(x, y);
+      tile.gamePiece = null;
 
       state.board.tiles.push(tile);
     }
@@ -31,42 +32,42 @@ function assignNeighbors(state: GameState): void {
 
   for (let tile of tiles) {
     Vector2.directions.forEach(dir => {
-      const neighborX = tile.position.x + dir.x;
-      const neighborY = tile.position.y + dir.y;
+      const neighborX = tile.arrayPosition.x + dir.x;
+      const neighborY = tile.arrayPosition.y + dir.y;
 
       if (neighborX >= 0 && neighborX < width && neighborY >= 0 && neighborY < height) {
         switch (dir) {
           case Vector2.UP:
-            tile.neighbor.up = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.up = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.DOWN:
-            tile.neighbor.down = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.down = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.LEFT:
-            tile.neighbor.left = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.left = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.RIGHT:
-            tile.neighbor.right = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.right = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.UP_LEFT:
-            tile.neighbor.upLeft = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.upLeft = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.UP_RIGHT:
-            tile.neighbor.upRight = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.upRight = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.DOWN_LEFT:
-            tile.neighbor.downLeft = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.downLeft = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
           case Vector2.DOWN_RIGHT:
-            tile.neighbor.downRight = new PositionState(neighborX, neighborY);
-            tile.neighbors.push(new PositionState(neighborX, neighborY));
+            tile.neighbor.downRight = new ArrayCoordinate(neighborX, neighborY);
+            tile.neighbors.push(new ArrayCoordinate(neighborX, neighborY));
             break;
         }
       }

@@ -13,7 +13,7 @@ public class DragHandler : MonoBehaviour
   // Start is called before the first frame update
   private void Start()
   {
-    _gameboardManager = GameObject.Find("GameboardManager").GetComponent<GameboardManager>(); //Get a reference to the GameboardManager
+    _gameboardManager = GameboardManager.Instance;
   }
   //Update is called once per frame
   void Update()
@@ -74,23 +74,23 @@ public class DragHandler : MonoBehaviour
     Destroy(gameObject); //Destroy the game piece
   }
 
-    /*---------------------------------------------------------
-    * Send the placement of the game piece to the server
-    * @param gameTile - The game tile the game piece is placed on
-    ----------------------------------------------------------*/
-    private void SendTilePlacement(GameTile gameTile)
-    {
-      NetworkManager networkManager = NetworkManager.Instance;
+  /*---------------------------------------------------------
+  * Send the placement of the game piece to the server
+  * @param gameTile - The game tile the game piece is placed on
+  ----------------------------------------------------------*/
+  private void SendTilePlacement(GameTile gameTile)
+  {
+    NetworkManager networkManager = NetworkManager.Instance;
 
-      if (TypeOfPiece == GamePieceType.OrangeTadpole || TypeOfPiece == GamePieceType.PurpleTadpole)
-      {
-        networkManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, "tadpole");
-      }
-      else
-      {
-        networkManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, "frog");
-      }
+    if (TypeOfPiece == GamePieceType.OrangeTadpole || TypeOfPiece == GamePieceType.PurpleTadpole)
+    {
+      networkManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, "tadpole");
     }
+    else
+    {
+      networkManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, "frog");
+    }
+  }
 
   /*--------------------------------------------------------------------------------------
    * Calculate the position for the game piece in this drag state

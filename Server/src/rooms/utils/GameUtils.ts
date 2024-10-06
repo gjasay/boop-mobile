@@ -1,4 +1,4 @@
-import { GameState, PositionState, TileState } from "../schema/GameState";
+import { GameState, ArrayCoordinate, TileState } from "../schema/GameState";
 import { Vector2 } from "./Vector2";
 
 export class GameUtils
@@ -20,7 +20,7 @@ export class GameUtils
   * @param position: The position of the tile to get
   * @returns The tile at the specified position or null
   ----------------------------------------------------------*/
-  static getTile(state: GameState, position: PositionState | Vector2): TileState | null
+  static getTile(state: GameState, position: ArrayCoordinate | Vector2): TileState | null
   {
     if (!position) return null;
 

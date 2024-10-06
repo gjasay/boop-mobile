@@ -15,9 +15,9 @@ public class NetworkManager : MonoBehaviour
   /* Events */
   public event Action<GameState> OnRoomCreated; //Event that is triggered when the room is created
   public event Action<BoardState> OnBoardCreated; //Event that is triggered when the board state changes
-  public event Action<BoardState> OnBoardChanged; //Event that is triggered when the board state changes
-  public event Action<GamePieceState> OnTadpolePlaced; //Event that is triggered when the game state changes
-  public event Action<GamePieceState> OnFrogPlaced; //Event that is triggered when the game state changes
+  public event Action<TileState> OnTileChange; //Event that is triggered when the board state changes
+  public event Action<BoardState> OnPiecePlaced; //Event that is triggered when a piece is placed
+  public event Action<BoardState> OnPostPlacement; //Event that is triggered when a piece is placed
   public event Action<HandState> OnUIChanged; //Event that is triggered when the UI state changes
 
   /* Private variables */
@@ -45,8 +45,6 @@ public class NetworkManager : MonoBehaviour
   {
     _uiManager = GameObject.Find("UI").GetComponent<UIManager>();
     _gameboardManager = GameboardManager.Instance;
-
-    //Test
   }
 
   /*------------------------------------------
@@ -129,6 +127,15 @@ public class NetworkManager : MonoBehaviour
       _gameboardManager.SelectTadpoleToEvolve();
     });
 
+    _room.OnMessage<string>("piecePlaced", (_msg) =>
+    {
+      OnPiecePlaced?.Invoke(_room.State.board);
+    });
+
+    _room.OnMessage<string>("turnComplete", (_msg) =>
+    {
+      OnPostPlacement?.Invoke(_room.State.board);
+    });
   }
 
   public void SendEvolvingTadpole(int x, int y)
@@ -146,9 +153,15 @@ public class NetworkManager : MonoBehaviour
     {
       tile.OnChange(() =>
       {
-        OnBoardChanged?.Invoke(_room.State.board);
+        OnTileChange?.Invoke(_room.State.board.tiles[tile.arrayPosition.y * _room.State.board.width + tile.arrayPosition.x]);
       });
     });
+  }
+
+  public bool IsPlayerTurn()
+  {
+    if (NullCheckRoom()) return false;
+    return _room.State.currentPlayer == PlayerId;
   }
 
   /*-------------------------------------------
@@ -162,6 +175,12 @@ public class NetworkManager : MonoBehaviour
     if (NullCheckRoom()) return;
     _room.Send("placePiece", new { x, y, type, playerId = PlayerId });
   }
+
+ public void SendTileTransform(int arrayX, int arrayY, float transformX, float transformY)
+ {
+    if (NullCheckRoom()) return;
+    _room.Send("assignTilePosition", new { arrayX, arrayY, transformX, transformY });
+ } 
 
   private void InitializeUIListener()
   {

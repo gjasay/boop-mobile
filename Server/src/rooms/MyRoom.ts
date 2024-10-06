@@ -3,21 +3,8 @@ import { GameState } from "./schema/GameState";
 import { createGameboard } from "./messages/CreateGameboard";
 import { handlePlacementRequest } from "./messages/PlacementRequest";
 import { requestEvolution } from "./messages/EvolutionRequest";
-
-interface PieceMessage
-{
-  x: number;
-  y: number;
-  type: string;
-  playerId: number;
-}
-
-interface EvolutionMessage
-{
-  x: number;
-  y: number;
-  playerId: number;
-}
+import { handlePostPlacement } from "./messages/PostPlacementLogic";
+import { assignTilePosition } from "./messages/AssignTilePosition";
 
 export class MyRoom extends Room<GameState>
 {
@@ -29,8 +16,9 @@ export class MyRoom extends Room<GameState>
     this.setState(new GameState()); //Set the initial state of the room
 
     this.onMessage("createRoom", () => createGameboard(this.state)); //Create the gameboard for the room
-    this.onMessage("placePiece", (client: Client, msg: PieceMessage) => handlePlacementRequest(this, client, msg.x, msg.y, msg.type, msg.playerId));
-    this.onMessage("evolveTadpole", (_client: Client, msg: EvolutionMessage) => requestEvolution(this, msg.x, msg.y, msg.playerId));
+    this.onMessage("assignTilePosition", (client: Client, msg: TilePositionMessage) => assignTilePosition(this.state, msg)); 
+    this.onMessage("placePiece", (client: Client, msg: PieceMessage) => handlePlacementRequest(this, client, msg));
+    this.onMessage("evolveTadpole", (_client: Client, msg: EvolutionMessage) => requestEvolution(this, msg));
   }
 
   sendEvolutionMessage(client: Client)

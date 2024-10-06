@@ -12,8 +12,8 @@ public class GameTile : MonoBehaviour
   // Start is called before the first frame update
   private void Start()
   {
-    _gameboardManager = GameObject.Find("GameboardManager").GetComponent<GameboardManager>(); //Get a reference to the GameboardManager
-    transform.SetParent(GameObject.Find("GameboardManager").transform); //Set the GameTile's parent to the GameboardManager
+    _gameboardManager = GameboardManager.Instance;
+    transform.SetParent(_gameboardManager.transform); //Set the GameTile's parent to the GameboardManager
   }
 
   // Update is called once per frame
@@ -39,7 +39,7 @@ public class GameTile : MonoBehaviour
       Collider2D[] colliders = Physics2D.OverlapPointAll(touchPosition);
 
       // Check if the touch position is over the game tile
-      foreach (var collider in colliders)
+      foreach (Collider2D collider in colliders)
       {
         if (collider == GetComponent<Collider2D>())
         {

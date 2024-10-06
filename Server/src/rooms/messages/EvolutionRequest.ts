@@ -2,11 +2,11 @@ import { MyRoom } from "../MyRoom";
 import { GameUtils } from "../utils/GameUtils";
 import { Vector2 } from "../utils/Vector2";
 
-export function requestEvolution(room: MyRoom, x: number, y: number, playerId: number)
+export function requestEvolution(room: MyRoom, piece: EvolutionMessage): void
 {
   const state = room.state;
-  const tile = GameUtils.getTile(state, new Vector2(x, y));
-  const player = GameUtils.getPlayer(state, playerId);
+  const tile = GameUtils.getTile(state, new Vector2(piece.x, piece.y));
+  const player = GameUtils.getPlayer(state, piece.playerId);
 
   if (tile.gamePiece.playerId !== player.id)
   {
@@ -22,5 +22,5 @@ export function requestEvolution(room: MyRoom, x: number, y: number, playerId: n
 
   tile.gamePiece = null;
   player.hand.frogs++;
-  GameUtils.switchPlayer(state, playerId);
+  GameUtils.switchPlayer(state, piece.playerId);
 }

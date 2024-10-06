@@ -14,7 +14,8 @@ public class DraggableUIGamePiece : MonoBehaviour
   //Private variables
   private SpriteRenderer _spriteRenderer; //Reference to the sprite renderer
   private ResourceManager _resourceManager; //Reference to the resource manager
-  private GamePieceManager _gamePieceManager;
+  private GamePieceManager _gamePieceManager; //Reference to the game piece manager
+  private NetworkManager _networkManager; //Reference to the network manager
   private GameObject _prefab; //Reference to the prefab to be instantiated
   private Sprite _sprite; //The sprite of the game piece
 
@@ -24,6 +25,7 @@ public class DraggableUIGamePiece : MonoBehaviour
     _spriteRenderer = GetComponent<SpriteRenderer>();
     _resourceManager = ResourceManager.Instance;
     _gamePieceManager = GamePieceManager.Instance;
+    _networkManager = NetworkManager.Instance;
   }
 
   // Update is called once per frame
@@ -60,6 +62,7 @@ public class DraggableUIGamePiece : MonoBehaviour
    ---------------------------------------------------------------*/
   private void DragPiece()
   {
+    if (!_networkManager.IsPlayerTurn()) return;
     if (DetectTouch() && !IsDragging)
     {
       GameObject newGamePiece = Instantiate(_prefab, transform.position, Quaternion.identity);

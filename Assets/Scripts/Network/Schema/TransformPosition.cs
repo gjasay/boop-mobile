@@ -11,39 +11,39 @@ using Action = System.Action;
 using UnityEngine.Scripting;
 #endif
 
-public partial class PositionState : Schema {
+public partial class TransformPosition : Schema {
 #if UNITY_5_3_OR_NEWER
 [Preserve] 
 #endif
-public PositionState() { }
-	[Type(0, "int32")]
-	public int x = default(int);
+public TransformPosition() { }
+	[Type(0, "float32")]
+	public float x = default(float);
 
-	[Type(1, "int32")]
-	public int y = default(int);
+	[Type(1, "float32")]
+	public float y = default(float);
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<int> __xChange;
-	public Action OnXChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<float> __xChange;
+	public Action OnXChange(PropertyChangeHandler<float> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.x));
 		__xChange += __handler;
-		if (__immediate && this.x != default(int)) { __handler(this.x, default(int)); }
+		if (__immediate && this.x != default(float)) { __handler(this.x, default(float)); }
 		return () => {
 			__callbacks.RemovePropertyCallback(nameof(x));
 			__xChange -= __handler;
 		};
 	}
 
-	protected event PropertyChangeHandler<int> __yChange;
-	public Action OnYChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<float> __yChange;
+	public Action OnYChange(PropertyChangeHandler<float> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.y));
 		__yChange += __handler;
-		if (__immediate && this.y != default(int)) { __handler(this.y, default(int)); }
+		if (__immediate && this.y != default(float)) { __handler(this.y, default(float)); }
 		return () => {
 			__callbacks.RemovePropertyCallback(nameof(y));
 			__yChange -= __handler;
@@ -52,8 +52,8 @@ public PositionState() { }
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(x): __xChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
-			case nameof(y): __yChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
+			case nameof(x): __xChange?.Invoke((float) change.Value, (float) change.PreviousValue); break;
+			case nameof(y): __yChange?.Invoke((float) change.Value, (float) change.PreviousValue); break;
 			default: break;
 		}
 	}

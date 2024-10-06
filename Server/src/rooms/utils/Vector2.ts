@@ -1,4 +1,4 @@
-import { PositionState } from "../schema/GameState";
+import { ArrayCoordinate } from "../schema/GameState";
 
 export class Vector2
 {
@@ -42,10 +42,10 @@ export class Vector2
   * @param b - The second vector or position state
   * @return type of parameter a - Vector2 or PositionState
   ---------------------------------------------------------*/
-  public static Add(a: Vector2 | PositionState, b: Vector2 | PositionState): Vector2 | PositionState
+  public static Add(a: Vector2 | ArrayCoordinate, b: Vector2 | ArrayCoordinate): Vector2 | ArrayCoordinate
   {
-    if (a instanceof PositionState) {
-      return new PositionState(a.x + b.x, a.y + b.y);
+    if (a instanceof ArrayCoordinate) {
+      return new ArrayCoordinate(a.x + b.x, a.y + b.y);
     } else if (a instanceof Vector2) {
       return new Vector2(a.x + b.x, a.y + b.y);
     }
@@ -57,10 +57,10 @@ export class Vector2
   * @param b - The second vector or position state
   * @return type of parameter a - Vector2 or PositionState
   ---------------------------------------------------------*/
-  public static Subtract(a: Vector2 | PositionState, b: Vector2 | PositionState): Vector2 | PositionState
+  public static Subtract(a: Vector2 | ArrayCoordinate, b: Vector2 | ArrayCoordinate): Vector2 | ArrayCoordinate
   {
-    if (a instanceof PositionState) {
-      return new PositionState(a.x - b.x, a.y - b.y);
+    if (a instanceof ArrayCoordinate) {
+      return new ArrayCoordinate(a.x - b.x, a.y - b.y);
     } else if (a instanceof Vector2) {
       return new Vector2(a.x - b.x, a.y - b.y);
     }
@@ -72,20 +72,20 @@ export class Vector2
   * @param b - The scalar to multiply by
   * @return type of parameter a - Vector2 or PositionState
   ----------------------------------------------------------*/
-  public static Multiply(a: Vector2 | PositionState | Vector2[] | PositionState[], b: number): Vector2 | PositionState | Vector2[] | PositionState[]
+  public static Multiply(a: Vector2 | ArrayCoordinate | Vector2[] | ArrayCoordinate[], b: number): Vector2 | ArrayCoordinate | Vector2[] | ArrayCoordinate[]
   {
     if (Array.isArray(a)) {
       return a.map((vector) =>
       {
-        if (vector instanceof PositionState) {
-          return new PositionState(vector.x * b, vector.y * b);
+        if (vector instanceof ArrayCoordinate) {
+          return new ArrayCoordinate(vector.x * b, vector.y * b);
         } else if (vector instanceof Vector2) {
           return new Vector2(vector.x * b, vector.y * b);
         }
       });
     } else {
-      if (a instanceof PositionState) {
-        return new PositionState(a.x * b, a.y * b);
+      if (a instanceof ArrayCoordinate) {
+        return new ArrayCoordinate(a.x * b, a.y * b);
       } else if (a instanceof Vector2) {
         return new Vector2(a.x * b, a.y * b);
       }
@@ -98,10 +98,10 @@ export class Vector2
   * @param b - The scalar to divide by
   * @return type of parameter a - Vector2 or PositionState
   ----------------------------------------------------------*/
-  public static Divide(a: Vector2 | PositionState, b: number): Vector2 | PositionState
+  public static Divide(a: Vector2 | ArrayCoordinate, b: number): Vector2 | ArrayCoordinate
   {
-    if (a instanceof PositionState) {
-      return new PositionState(a.x / b, a.y / b);
+    if (a instanceof ArrayCoordinate) {
+      return new ArrayCoordinate(a.x / b, a.y / b);
     } else if (a instanceof Vector2) {
       return new Vector2(a.x / b, a.y / b);
     }
@@ -114,24 +114,24 @@ export class Vector2
   * @return boolean - True if the vectors are equal
   * @return boolean - False if the vectors are not equal
   ---------------------------------------------------------*/
-  public static Compare(a: Vector2 | PositionState, b: Vector2 | PositionState): boolean
+  public static Compare(a: Vector2 | ArrayCoordinate, b: Vector2 | ArrayCoordinate): boolean
   {
     return a.x === b.x && a.y === b.y;
   }
 
-  public static Destructure(vector: Vector2 | PositionState): { x: number, y: number }
+  public static Destructure(vector: Vector2 | ArrayCoordinate): { x: number, y: number }
   {
     return { x: vector.x, y: vector.y };
   }
 
-  public static Convert(position: PositionState): Vector2
+  public static Convert(position: ArrayCoordinate): Vector2
   {
     return new Vector2(position.x, position.y);
   }
 
-  public static ToPositionState(vector: Vector2): PositionState
+  public static ToPositionState(vector: Vector2): ArrayCoordinate
   {
-    return new PositionState(vector.x, vector.y);
+    return new ArrayCoordinate(vector.x, vector.y);
   }
 
 }

@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using SchemaTest.InstanceSharingTypes;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameboardManager : MonoBehaviour
@@ -20,6 +17,8 @@ public class GameboardManager : MonoBehaviour
   private NetworkManager _networkManager; //Reference to the NetworkManager
   private ResourceManager _resourceManager; //Reference to the ResourceManager
   private GamePieceManager _gamePieceManager; //Reference to the GamePieceManager
+
+  private int _movingPieces = 0;
 
   //Awake is called when the script instance is being loaded
   private void Awake()
@@ -45,7 +44,7 @@ public class GameboardManager : MonoBehaviour
 
     //Subscribe to events
     _networkManager.OnBoardCreated += CreateGameboard;
-    _networkManager.OnBoardChanged += HandleChange;
+    _networkManager.OnTileChange += HandlePlacement;
   }
 
   private void Update()
@@ -104,7 +103,8 @@ public class GameboardManager : MonoBehaviour
 
     GameObject tadpole = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
     PlacedPiece gamePiece = tadpole.AddComponent<PlacedPiece>();
-    gamePiece.SetTilePlacement(gameTile, "tadpole");
+    gamePiece.SetTilePlacement(gameTile);
+    gamePiece.SetPieceType("tadpole");
   }
 
   /*---------------------------------------------------------
@@ -131,7 +131,20 @@ public class GameboardManager : MonoBehaviour
 
     GameObject frog = Instantiate(prefab, gameTile.transform.position, Quaternion.identity);
     PlacedPiece gamePiece = frog.AddComponent<PlacedPiece>();
-    gamePiece.SetTilePlacement(gameTile, "frog");
+    gamePiece.SetTilePlacement(gameTile);
+    gamePiece.SetPieceType("frog");
+  }
+
+  private void PlacePiece(int tileX, int tileY, int playerId, string pieceType)
+  {
+    if (pieceType == "tadpole")
+    {
+      PlaceTadpole(tileX, tileY, playerId);
+    }
+    else if (pieceType == "frog")
+    {
+      PlaceFrog(tileX, tileY, playerId);
+    }
   }
 
   /*---------------------------------------------------------
@@ -151,41 +164,24 @@ public class GameboardManager : MonoBehaviour
 
     state.tiles.ForEach((tile) =>
     {
-      PositionState position = tile.position;
-      GameTile gameTile = Instantiate(_gameTilePrefab, new Vector3(startX + position.x * tileSize, startY + position.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
-      gameTile.ArrayPosition = new Vector2Int(position.x, position.y);
+      ArrayCoordinate coordinate = tile.arrayPosition;
+      GameTile gameTile = Instantiate(_gameTilePrefab, new Vector3(startX + coordinate.x * tileSize, startY + coordinate.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
+      gameTile.ArrayPosition = new Vector2Int(coordinate.x, coordinate.y);
 
-      GameTiles[position.x, position.y] = gameTile;
+      GameTiles[coordinate.x, coordinate.y] = gameTile;
+
+      _networkManager.SendTileTransform(coordinate.x, coordinate.y, gameTile.transform.position.x, gameTile.transform.position.y);
     });
 
     _networkManager.InitializeTileListener();
   }
 
-  private void HandleChange(BoardState state)
+  private void HandlePlacement(TileState state)
   {
-    // Place pieces on the board
-    state.tiles.ForEach((tile) =>
-    {
-      PositionState position = tile.position;
-      GameTile gameTile = GameTiles[position.x, position.y];
-
-      if (tile.gamePiece != null && gameTile.CurrentlyHeldPiece == null)
-      {
-        if (tile.gamePiece.type == "tadpole")
-        {
-          PlaceTadpole(position.x, position.y, tile.gamePiece.playerId);
-        }
-        else if (tile.gamePiece.type == "frog")
-        {
-          PlaceFrog(position.x, position.y, tile.gamePiece.playerId);
-        }
-      }
-      else if (tile.gamePiece == null && gameTile.CurrentlyHeldPiece != null)
-      {
-        Destroy(gameTile.CurrentlyHeldPiece.gameObject);
-      }
-    });
+    PlacePiece(state.arrayPosition.x, state.arrayPosition.y, state.gamePiece.playerId, state.gamePiece.type);
   }
+  
+  
 
   /*------------------------------------------------------------------------------------------
   * Check if the player is currently touching the game board
