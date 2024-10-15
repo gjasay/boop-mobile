@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GameboardManager : MonoBehaviour
 {
@@ -17,8 +18,6 @@ public class GameboardManager : MonoBehaviour
   private NetworkManager _networkManager; //Reference to the NetworkManager
   private ResourceManager _resourceManager; //Reference to the ResourceManager
   private GamePieceManager _gamePieceManager; //Reference to the GamePieceManager
-
-  private int _movingPieces = 0;
 
   //Awake is called when the script instance is being loaded
   private void Awake()
@@ -178,10 +177,54 @@ public class GameboardManager : MonoBehaviour
 
   private void HandlePlacement(TileState state)
   {
-    PlacePiece(state.arrayPosition.x, state.arrayPosition.y, state.gamePiece.playerId, state.gamePiece.type);
+    GameTile gameTile = GameTiles[state.arrayPosition.x, state.arrayPosition.y];
+
+    if (state.gamePiece != null && state.gamePiece.type != null && state.gamePiece.priorCoordinate != null && state.gamePiece.priorCoordinate.x != -1 && state.gamePiece.priorCoordinate.y != -1)
+    {
+      GameTile priorGameTile = GameTiles[state.gamePiece.priorCoordinate.x, state.gamePiece.priorCoordinate.y];
+      Debug.Log("Moving piece");
+      StartCoroutine(MovePiece(priorGameTile, gameTile, 0.5f));
+    }
+    else if (state.gamePiece != null && gameTile.CurrentlyHeldPiece == null)
+    {
+      PlacePiece(state.arrayPosition.x, state.arrayPosition.y, state.gamePiece.playerId, state.gamePiece.type);
+    }
+    else if (state.gamePiece == null && gameTile.CurrentlyHeldPiece != null && gameTile.CurrentlyHeldPiece.IsMoving == false)
+    {
+      Destroy(gameTile.CurrentlyHeldPiece.gameObject);
+    }
   }
-  
-  
+
+  IEnumerator MovePiece(GameTile origin, GameTile destination, float duration)
+  {
+    if (origin.CurrentlyHeldPiece == null) yield break;
+    origin.CurrentlyHeldPiece.IsMoving = true;
+
+    float time = 0;
+    Vector3 startPosition = origin.CurrentlyHeldPiece.transform.position;
+    Vector3 endPosition = destination.transform.position;
+
+    while (time < duration)
+    {
+      origin.CurrentlyHeldPiece.transform.position = Vector3.Lerp(startPosition, endPosition, time / duration);
+      time += Time.deltaTime;
+      yield return null;
+    }
+
+    origin.CurrentlyHeldPiece.transform.position = endPosition;
+
+    if (origin.CurrentlyHeldPiece != null)
+    {
+      origin.CurrentlyHeldPiece.SetTilePlacement(destination);
+      origin.CurrentlyHeldPiece = null;
+
+      destination.CurrentlyHeldPiece.IsMoving = false;
+    }
+
+    _networkManager.SendPieceMoved(destination);
+  }
+
+
 
   /*------------------------------------------------------------------------------------------
   * Check if the player is currently touching the game board

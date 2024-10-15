@@ -5,6 +5,7 @@ import { handlePlacementRequest } from "./messages/PlacementRequest";
 import { requestEvolution } from "./messages/EvolutionRequest";
 import { handlePostPlacement } from "./messages/PostPlacementLogic";
 import { assignTilePosition } from "./messages/AssignTilePosition";
+import { handlePieceMoved } from "./messages/PieceMove";
 
 export class MyRoom extends Room<GameState>
 {
@@ -18,6 +19,7 @@ export class MyRoom extends Room<GameState>
     this.onMessage("createRoom", () => createGameboard(this.state)); //Create the gameboard for the room
     this.onMessage("assignTilePosition", (client: Client, msg: TilePositionMessage) => assignTilePosition(this.state, msg)); 
     this.onMessage("placePiece", (client: Client, msg: PieceMessage) => handlePlacementRequest(this, client, msg));
+    this.onMessage("pieceMoved", (_client: Client, msg: Coordinate) => handlePieceMoved(this.state, msg));
     this.onMessage("evolveTadpole", (_client: Client, msg: EvolutionMessage) => requestEvolution(this, msg));
   }
 

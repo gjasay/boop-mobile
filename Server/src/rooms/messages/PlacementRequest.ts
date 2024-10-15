@@ -5,6 +5,8 @@ import { GameUtils } from "../utils/GameUtils";
 import { Client } from "colyseus";
 import { handlePostPlacement } from "./PostPlacementLogic";
 
+const movingNeighbors: TileState[] = [];
+
 /*------------------------------------------------------------------
 * Handle a request to place a piece on the board
 * @param x: The x array position of the tile to place the piece on
@@ -12,7 +14,7 @@ import { handlePostPlacement } from "./PostPlacementLogic";
 * @param pieceType: The type of piece to place
 * @param playerId: The ID of the player placing the piece
 --------------------------------------------------------------------*/
-export function handlePlacementRequest(room: MyRoom, client: Client, piece: PieceMessage): void
+export async function handlePlacementRequest(room: MyRoom, client: Client, piece: PieceMessage): Promise<void>
 {
   const state = room.state;
   const tile = GameUtils.getTile(state, new ArrayCoordinate(piece.x, piece.y));
@@ -21,7 +23,32 @@ export function handlePlacementRequest(room: MyRoom, client: Client, piece: Piec
   if (!isValidMove(state, tile, player)) return;
 
   placePiece(room, tile, player, piece.type);
-  handlePostPlacement(room, client, piece);
+
+  if (movingNeighbors.length > 0) {
+    console.log(`[Player ${player.id}] Please wait for pieces to move...`);
+    await waitForPiecesToMove(movingNeighbors);
+    handlePostPlacement(room, client, piece);
+    return;
+  } else {
+    console.log(`[Player ${player.id}] Piece does not need to move`);
+    handlePostPlacement(room, client, piece);
+  }
+
+}
+
+async function waitForPiecesToMove(tiles: TileState[]): Promise<void>
+{
+  return new Promise((resolve) =>
+  {
+    const interval = setInterval(() =>
+    {
+      const allMoved = tiles.every((tile) => !tile.gamePiece?.priorCoordinate);
+      if (allMoved) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
 }
 
 /*---------------------------------------------------------
@@ -71,11 +98,9 @@ function placePiece(room: MyRoom, tile: TileState, player: PlayerState, pieceTyp
   if (pieceType === "tadpole" && player.hand.tadpoles > 0) {
     setPieceOnTile(state, tile, player.id, pieceType);
     player.hand.tadpoles--;
-    // checkForEvolution(room, client, player);
   } else if (pieceType === "frog" && player.hand.frogs > 0) {
     setPieceOnTile(state, tile, player.id, pieceType);
     player.hand.frogs--;
-    // checkForAllFrogs(room, client, player);
   } else {
     console.warn(`Invalid move: Player does not have any ${pieceType}s left.`);
   }
@@ -97,7 +122,6 @@ function setPieceOnTile(state: GameState, tile: TileState, playerId: number, typ
 
   //Process game logic
   pushTileNeighbors(state, tile);
-  // checkForRow(state, tilesToCheck);
 }
 
 
@@ -132,6 +156,7 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
     if (tile.gamePiece?.type === "tadpole" && neighborTile.gamePiece?.type === "frog") return; // Tadpoles cannot push frogs
 
     if (!destinationTile.gamePiece) {
+      movingNeighbors.push(destinationTile);
       destinationTile.gamePiece = neighborTile.gamePiece;
       destinationTile.gamePiece.priorCoordinate = neighborTile.arrayPosition as ArrayCoordinate;
       neighborTile.gamePiece = null;

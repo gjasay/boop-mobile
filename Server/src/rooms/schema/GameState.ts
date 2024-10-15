@@ -10,7 +10,7 @@ export class ArrayCoordinate extends Schema
   @type("int32") x: number;
   @type("int32") y: number;
 
-  constructor(x: number = 0, y: number = 0)
+  constructor(x: number = -1, y: number = -1)
   {
     super();
     this.x = x;
@@ -63,10 +63,10 @@ export class TileState extends Schema
 {
   @type(GamePieceState) gamePiece: GamePieceState = new GamePieceState();
   //These represent the position of the tile in the 2D array
-  @type (ArrayCoordinate) arrayPosition = new ArrayCoordinate();
-  @type (TransformPosition) position = new TransformPosition();
-  @type (NeighborState) neighbor = new NeighborState();
-  @type ([ArrayCoordinate]) neighbors = new ArraySchema<ArrayCoordinate>();
+  @type(ArrayCoordinate) arrayPosition = new ArrayCoordinate();
+  @type(TransformPosition) position = new TransformPosition();
+  @type(NeighborState) neighbor = new NeighborState();
+  @type([ArrayCoordinate]) neighbors = new ArraySchema<ArrayCoordinate>();
 }
 
 export class HandState extends Schema
@@ -90,7 +90,7 @@ export class PlayerState extends Schema
 
 export class BoardState extends Schema
 {
-  @type ([TileState]) tiles = new ArraySchema<TileState>();
+  @type([TileState]) tiles = new ArraySchema<TileState>();
   @type("int32") width = 6;
   @type("int32") height = 6;
 }

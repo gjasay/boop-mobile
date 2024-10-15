@@ -1,3 +1,9 @@
+interface Coordinate
+{
+  x: number;
+  y: number;
+}
+
 interface PieceMessage
 {
   x: number;

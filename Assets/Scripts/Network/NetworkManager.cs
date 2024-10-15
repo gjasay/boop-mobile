@@ -144,6 +144,12 @@ public class NetworkManager : MonoBehaviour
     _room.Send("evolveTadpole", new { x, y, playerId = PlayerId });
   }
 
+  public void SendPieceMoved(GameTile tile)
+  {
+    if (NullCheckRoom()) return;
+    _room.Send("pieceMoved", new { x = tile.ArrayPosition.x, y = tile.ArrayPosition.y });
+  }
+
   /*-------------------------------------------
   * Initialize the tile listener
   ---------------------------------------------*/
@@ -176,11 +182,11 @@ public class NetworkManager : MonoBehaviour
     _room.Send("placePiece", new { x, y, type, playerId = PlayerId });
   }
 
- public void SendTileTransform(int arrayX, int arrayY, float transformX, float transformY)
- {
+  public void SendTileTransform(int arrayX, int arrayY, float transformX, float transformY)
+  {
     if (NullCheckRoom()) return;
     _room.Send("assignTilePosition", new { arrayX, arrayY, transformX, transformY });
- } 
+  }
 
   private void InitializeUIListener()
   {
