@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class GameboardManager : MonoBehaviour
 {
@@ -183,11 +182,16 @@ public class GameboardManager : MonoBehaviour
     {
       GameTile priorGameTile = GameTiles[state.gamePiece.priorCoordinate.x, state.gamePiece.priorCoordinate.y];
       Debug.Log("Moving piece");
-      StartCoroutine(MovePiece(priorGameTile, gameTile, 0.5f));
-    }
+      StartCoroutine(MovePieceToTile(priorGameTile, gameTile, 0.5f));
+    } 
     else if (state.gamePiece != null && gameTile.CurrentlyHeldPiece == null)
     {
       PlacePiece(state.arrayPosition.x, state.arrayPosition.y, state.gamePiece.playerId, state.gamePiece.type);
+    }
+    else if (state.gamePiece == null && state.outOfBounds != null && state.outOfBounds != "")
+    {
+      Debug.Log("Out of bounds direction: " + state.outOfBounds);
+      StartCoroutine(MovePieceOutOfBounds(gameTile, state.outOfBounds, 0.5f));
     }
     else if (state.gamePiece == null && gameTile.CurrentlyHeldPiece != null && gameTile.CurrentlyHeldPiece.IsMoving == false)
     {
@@ -195,7 +199,7 @@ public class GameboardManager : MonoBehaviour
     }
   }
 
-  IEnumerator MovePiece(GameTile origin, GameTile destination, float duration)
+  IEnumerator MovePieceToTile(GameTile origin, GameTile destination, float duration)
   {
     if (origin.CurrentlyHeldPiece == null) yield break;
     origin.CurrentlyHeldPiece.IsMoving = true;
@@ -222,6 +226,67 @@ public class GameboardManager : MonoBehaviour
     }
 
     _networkManager.SendPieceMoved(destination);
+  }
+
+  IEnumerator MovePieceOutOfBounds(GameTile origin, string direction, float duration)
+  {
+    if (origin.CurrentlyHeldPiece == null) yield break;
+    origin.CurrentlyHeldPiece.IsMoving = true;
+
+    float time = 0;
+    float offset = 0.65f;
+    Vector3 startPosition = origin.CurrentlyHeldPiece.transform.position;
+    Vector3 endPosition;
+
+    switch (direction)
+    {
+      case "top":
+        endPosition = new Vector3(startPosition.x, startPosition.y + offset, startPosition.z);
+        break;
+      case "bottom":
+        endPosition = new Vector3(startPosition.x, startPosition.y - offset, startPosition.z);
+        break;
+      case "left":
+        endPosition = new Vector3(startPosition.x - offset, startPosition.y, startPosition.z);
+        break;
+      case "right":
+        endPosition = new Vector3(startPosition.x + offset, startPosition.y, startPosition.z);
+        break;
+      case "top-left":
+        endPosition = new Vector3(startPosition.x - offset, startPosition.y + offset, startPosition.z);
+        break;
+      case "top-right":
+        endPosition = new Vector3(startPosition.x + offset, startPosition.y + offset, startPosition.z);
+        break;
+      case "bottom-left":
+        endPosition = new Vector3(startPosition.x - offset, startPosition.y - offset, startPosition.z);
+        break;
+      case "bottom-right":
+        endPosition = new Vector3(startPosition.x + offset, startPosition.y - offset, startPosition.z);
+        break;
+      default:
+        Debug.LogWarning("Invalid direction");
+        endPosition = startPosition;
+        break;
+    }
+
+    while (time < duration)
+    {
+      origin.CurrentlyHeldPiece.transform.position = Vector3.Lerp(startPosition, endPosition, time / duration);
+      time += Time.deltaTime;
+      yield return null;
+    }
+
+    origin.CurrentlyHeldPiece.transform.position = endPosition;
+
+    if (origin.CurrentlyHeldPiece != null)
+    {
+      Destroy(origin.CurrentlyHeldPiece.gameObject);
+    }
+
+    origin.CurrentlyHeldPiece = null;
+
+    _networkManager.SendPieceMoved(origin);
   }
 
 

@@ -5,7 +5,7 @@ import { GameUtils } from "../utils/GameUtils";
 import { Client } from "colyseus";
 import { handlePostPlacement } from "./PostPlacementLogic";
 
-const movingNeighbors: TileState[] = [];
+const movingPieces: TileState[] = [];
 
 /*------------------------------------------------------------------
 * Handle a request to place a piece on the board
@@ -22,11 +22,13 @@ export async function handlePlacementRequest(room: MyRoom, client: Client, piece
 
   if (!isValidMove(state, tile, player)) return;
 
+  tile.outOfBounds = null;
+
   placePiece(room, tile, player, piece.type);
 
-  if (movingNeighbors.length > 0) {
+  if (movingPieces.length > 0) {
     console.log(`[Player ${player.id}] Please wait for pieces to move...`);
-    await waitForPiecesToMove(movingNeighbors);
+    await waitForPiecesToMove(movingPieces);
     handlePostPlacement(room, client, piece);
     return;
   } else {
@@ -145,8 +147,10 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
     const direction = Vector2.Subtract(neighborTile.arrayPosition, tile.arrayPosition) as Vector2;
     const destinationPosition = Vector2.Add(neighborTile.arrayPosition, direction);
 
-    if (GameUtils.isOutOfBounds(state, destinationPosition)) {
-      handleOutOfBounds(state, neighborTile);
+    const outOfBoundsDirection = GameUtils.isOutOfBounds(state, destinationPosition);
+
+    if (outOfBoundsDirection !== "") {
+      handleOutOfBounds(state, neighborTile, outOfBoundsDirection);
       return;
     }
 
@@ -156,7 +160,7 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
     if (tile.gamePiece?.type === "tadpole" && neighborTile.gamePiece?.type === "frog") return; // Tadpoles cannot push frogs
 
     if (!destinationTile.gamePiece) {
-      movingNeighbors.push(destinationTile);
+      movingPieces.push(destinationTile);
       destinationTile.gamePiece = neighborTile.gamePiece;
       destinationTile.gamePiece.priorCoordinate = neighborTile.arrayPosition as ArrayCoordinate;
       neighborTile.gamePiece = null;
@@ -169,7 +173,7 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
 * @param state: The current game state
 * @param tile: The tile that the piece is being pushed from
 -----------------------------------------------------------*/
-function handleOutOfBounds(state: GameState, tile: TileState): void
+function handleOutOfBounds(state: GameState, tile: TileState, direction: string): void
 {
   if (!tile.gamePiece) return;
 
@@ -193,6 +197,7 @@ function handleOutOfBounds(state: GameState, tile: TileState): void
       }
       break;
   }
-
+  movingPieces.push(tile);
+  tile.outOfBounds = direction;
   tile.gamePiece = null;
 }

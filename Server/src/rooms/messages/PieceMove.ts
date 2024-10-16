@@ -6,6 +6,7 @@ export function handlePieceMoved(state: GameState, coordinate: Coordinate) {
     if (tile && tile.gamePiece) {
       console.log("Piece moved to: ", coordinate);
       tile.gamePiece.priorCoordinate = null;
+      tile.outOfBounds = null;
     } else {
       console.log("Error: No tile found at coordinate: ", coordinate);
     }

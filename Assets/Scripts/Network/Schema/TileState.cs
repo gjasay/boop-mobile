@@ -31,6 +31,9 @@ public TileState() { }
 	[Type(4, "array", typeof(ArraySchema<ArrayCoordinate>))]
 	public ArraySchema<ArrayCoordinate> neighbors = new ArraySchema<ArrayCoordinate>();
 
+	[Type(5, "string")]
+	public string outOfBounds = default(string);
+
 	/*
 	 * Support for individual property change callbacks below...
 	 */
@@ -95,6 +98,18 @@ public TileState() { }
 		};
 	}
 
+	protected event PropertyChangeHandler<string> __outOfBoundsChange;
+	public Action OnOutOfBoundsChange(PropertyChangeHandler<string> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.outOfBounds));
+		__outOfBoundsChange += __handler;
+		if (__immediate && this.outOfBounds != default(string)) { __handler(this.outOfBounds, default(string)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(outOfBounds));
+			__outOfBoundsChange -= __handler;
+		};
+	}
+
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(gamePiece): __gamePieceChange?.Invoke((GamePieceState) change.Value, (GamePieceState) change.PreviousValue); break;
@@ -102,6 +117,7 @@ public TileState() { }
 			case nameof(position): __positionChange?.Invoke((TransformPosition) change.Value, (TransformPosition) change.PreviousValue); break;
 			case nameof(neighbor): __neighborChange?.Invoke((NeighborState) change.Value, (NeighborState) change.PreviousValue); break;
 			case nameof(neighbors): __neighborsChange?.Invoke((ArraySchema<ArrayCoordinate>) change.Value, (ArraySchema<ArrayCoordinate>) change.PreviousValue); break;
+			case nameof(outOfBounds): __outOfBoundsChange?.Invoke((string) change.Value, (string) change.PreviousValue); break;
 			default: break;
 		}
 	}

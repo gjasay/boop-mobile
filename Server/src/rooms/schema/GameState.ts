@@ -67,6 +67,7 @@ export class TileState extends Schema
   @type(TransformPosition) position = new TransformPosition();
   @type(NeighborState) neighbor = new NeighborState();
   @type([ArrayCoordinate]) neighbors = new ArraySchema<ArrayCoordinate>();
+  @type("string") outOfBounds: string = null;
 }
 
 export class HandState extends Schema
