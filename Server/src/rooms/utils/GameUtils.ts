@@ -39,34 +39,9 @@ export class GameUtils
   * @param state: The current game state
   * @param position: The position to check
   ---------------------------------------------------------------*/
-  static isOutOfBounds(state: GameState, position: Vector2): string
+  static isOutOfBounds(state: GameState, position: Vector2): boolean
   {
-    // return which direction the piece is out of bounds
-    if (position.x < 0 && position.y < 0) {
-      return "bottom-left";
-    } else if (position.x >= state.board.width && position.y < 0) {
-      return "bottom-right";
-    } else if (position.x < 0 && position.y >= state.board.height) {
-      return "top-left";
-    }
-    else if (position.x >= state.board.width && position.y >= state.board.height) {
-      return "top-right";
-    }
-    else if (position.x < 0) {
-      return "left";
-    }
-    else if (position.x >= state.board.width) {
-      return "right";
-    }
-    else if (position.y < 0) {
-      return "bottom";
-    }
-    else if (position.y >= state.board.height) {
-      return "top";
-    }
-    else {
-      return "";
-    }
+    return position.x < 0 || position.x >= state.board.width || position.y < 0 || position.y >= state.board.height;
   }
 
   /*---------------------------------------------------------

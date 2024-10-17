@@ -78,16 +78,36 @@ function checkForRow(state: GameState, tiles: TileState[]): void
   {
     if (!tile || !tile.gamePiece) return;
 
+    console.log(`Checking for rows of three for tile ${tile.arrayPosition.x}, ${tile.arrayPosition.y}`);
+
     rowsToTest.forEach((row) =>
     {
       const rowPieces: TileState[] = [tile];
 
       row.forEach((direction) =>
       {
+        console.log(`Checking direction ${direction.x}, ${direction.y} for tile ${tile.arrayPosition.x}, ${tile.arrayPosition.y}`);
         const neighbor = GameUtils.getTile(state, Vector2.Add(tile.arrayPosition, direction));
 
-        if (!neighbor || !neighbor.gamePiece || !tile.gamePiece) return;
-        if (neighbor.gamePiece.playerId !== tile.gamePiece.playerId) return;
+        if (!neighbor) {
+          console.log(`Neighbor ${tile.arrayPosition.x + direction.x}, ${tile.arrayPosition.y + direction.y} does not exist`);
+          return;
+        };
+
+        if (!neighbor.gamePiece) {
+          console.log(`Neighbor ${neighbor.arrayPosition.x}, ${neighbor.arrayPosition.y} does not have a game piece`);
+          return;
+        }
+
+        if (!tile.gamePiece) {
+          console.log(`Tile ${tile.arrayPosition.x}, ${tile.arrayPosition.y} does not have a game piece`);
+          return;
+        }
+
+        if (neighbor.gamePiece.playerId !== tile.gamePiece.playerId) {
+          console.log(`Neighbor ${neighbor.arrayPosition.x}, ${neighbor.arrayPosition.y} is not the same player`);
+          return;
+        }
 
         rowPieces.push(neighbor);
       });
@@ -101,7 +121,8 @@ function checkForRow(state: GameState, tiles: TileState[]): void
           return (
             piece.arrayPosition.x === prevPiece.arrayPosition.x ||
             piece.arrayPosition.y === prevPiece.arrayPosition.y ||
-            (piece.arrayPosition.x - prevPiece.arrayPosition.x === piece.arrayPosition.y - prevPiece.arrayPosition.y)
+            (piece.arrayPosition.x - prevPiece.arrayPosition.x === piece.arrayPosition.y - prevPiece.arrayPosition.y) ||
+            (piece.arrayPosition.x - prevPiece.arrayPosition.x === prevPiece.arrayPosition.y - piece.arrayPosition.y)
           );
         });
 

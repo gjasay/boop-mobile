@@ -30,6 +30,7 @@ export async function handlePlacementRequest(room: MyRoom, client: Client, piece
     console.log(`[Player ${player.id}] Please wait for pieces to move...`);
     await waitForPiecesToMove(movingPieces);
     handlePostPlacement(room, client, piece);
+    movingPieces.length = 0;
     return;
   } else {
     console.log(`[Player ${player.id}] Piece does not need to move`);
@@ -44,7 +45,7 @@ async function waitForPiecesToMove(tiles: TileState[]): Promise<void>
   {
     const interval = setInterval(() =>
     {
-      const allMoved = tiles.every((tile) => !tile.gamePiece?.priorCoordinate);
+      const allMoved = tiles.every((tile) => !tile.gamePiece?.priorCoordinate && !tile.outOfBounds);
       if (allMoved) {
         clearInterval(interval);
         resolve();
@@ -147,9 +148,30 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
     const direction = Vector2.Subtract(neighborTile.arrayPosition, tile.arrayPosition) as Vector2;
     const destinationPosition = Vector2.Add(neighborTile.arrayPosition, direction);
 
-    const outOfBoundsDirection = GameUtils.isOutOfBounds(state, destinationPosition);
+    if (GameUtils.isOutOfBounds(state, destinationPosition)) {
+      let outOfBoundsDirection: string;
 
-    if (outOfBoundsDirection !== "") {
+      if (Vector2.Compare(direction, Vector2.UP)) {
+        outOfBoundsDirection = "top";
+      } else if (Vector2.Compare(direction, Vector2.DOWN)) {
+        outOfBoundsDirection = "bottom";
+      } else if (Vector2.Compare(direction, Vector2.LEFT)) {
+        outOfBoundsDirection = "left";
+      } else if (Vector2.Compare(direction, Vector2.RIGHT)) {
+        outOfBoundsDirection = "right";
+      } else if (Vector2.Compare(direction, Vector2.UP_LEFT)) {
+        outOfBoundsDirection = "top-left";
+      } else if (Vector2.Compare(direction, Vector2.UP_RIGHT)) {
+        outOfBoundsDirection = "top-right";
+      } else if (Vector2.Compare(direction, Vector2.DOWN_LEFT)) {
+        outOfBoundsDirection = "bottom-left";
+      } else if (Vector2.Compare(direction, Vector2.DOWN_RIGHT)) {
+        outOfBoundsDirection = "bottom-right";
+      } else {
+        console.error(`Invalid direction: ${direction}`);
+        return;
+      }
+
       handleOutOfBounds(state, neighborTile, outOfBoundsDirection);
       return;
     }
