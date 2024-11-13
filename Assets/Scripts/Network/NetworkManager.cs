@@ -18,13 +18,13 @@ public class NetworkManager : MonoBehaviour
   public event Action<TileState> OnTileChange; //Event that is triggered when the board state changes
   public event Action<BoardState> OnPiecePlaced; //Event that is triggered when a piece is placed
   public event Action<BoardState> OnPostPlacement; //Event that is triggered when a piece is placed
-  public event Action<HandState> OnUIChanged; //Event that is triggered when the UI state changes
+  public event Action<HandState> OnHandChanged; //Event that is triggered when the UI state changes
 
   /* Private variables */
   private bool _boardCreated = false;
   private ColyseusClient _client; //Reference to the Colyseus client
   private ColyseusRoom<GameState> _room; //Reference to the Game room
-  private UIManager _uiManager; //Reference to the UIManager
+  private MainUIEventHandler _uiManager; //Reference to the UIManager
   private GameboardManager _gameboardManager; //Reference to the GameboardManager
 
   private void Awake()
@@ -43,7 +43,7 @@ public class NetworkManager : MonoBehaviour
 
   private void Start()
   {
-    _uiManager = GameObject.Find("UI").GetComponent<UIManager>();
+    _uiManager = GameObject.Find("GameUI").GetComponent<MainUIEventHandler>();
     _gameboardManager = GameboardManager.Instance;
   }
 
@@ -82,7 +82,26 @@ public class NetworkManager : MonoBehaviour
     GetClientId();
     GetRoomId();
 
-    _uiManager.DisableRoomCodeText();
+    // _uiManager.DisableRoomCodeText();
+
+    PlayerId = 2;
+    InitializeUIListener();
+    GamePieceManager.Instance.SetFrogType(PlayerId);
+    GamePieceManager.Instance.SetTadpoleType(PlayerId);
+  }
+
+  public async Task JoinOrCreateRoom()
+  {
+    _room = await _client.JoinOrCreate<GameState>("my_room"); //Join a colyseus room
+    RegisterRoomHandlers(); //Register the room handlers
+
+    GetClientId();
+    GetRoomId();
+
+    // _uiManager.DisableRoomCodeText();
+
+    //check if player created or joined room
+    // if (_room.State.plq)
 
     PlayerId = 2;
     InitializeUIListener();
@@ -103,7 +122,7 @@ public class NetworkManager : MonoBehaviour
   -----------------------------*/
   private void RegisterRoomHandlers()
   {
-    NullCheckRoom();
+    if (NullCheckRoom()) return;
 
     /*-------------------------------------------
     * Trigger events when the game state changes
@@ -193,23 +212,23 @@ public class NetworkManager : MonoBehaviour
     Debug.Log("Initializing UI Listener");
     if (NullCheckRoom()) return;
     Debug.Log("Room is not null");
-    if (PlayerId == 1)
+    switch (PlayerId)
     {
-      _room.State.playerOne.hand.OnChange(() =>
-      {
-        OnUIChanged?.Invoke(_room.State.playerOne.hand);
-      });
-    }
-    else if (PlayerId == 2)
-    {
-      _room.State.playerTwo.hand.OnChange(() =>
-      {
-        OnUIChanged?.Invoke(_room.State.playerTwo.hand);
-      });
-    }
-    else
-    {
-      Debug.LogError("Player id is not set");
+      case 1:
+        _room.State.playerOne.hand.OnChange(() =>
+        {
+          OnHandChanged?.Invoke(_room.State.playerOne.hand);
+        });
+        break;
+      case 2:
+        _room.State.playerTwo.hand.OnChange(() =>
+        {
+          OnHandChanged?.Invoke(_room.State.playerTwo.hand);
+        });
+        break;
+      default:
+        Debug.LogError("Player id is not set");
+        break;
     }
   }
 

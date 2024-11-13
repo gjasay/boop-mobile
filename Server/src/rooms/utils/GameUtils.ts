@@ -51,6 +51,7 @@ export class GameUtils
   ----------------------------------------------------------*/
   static switchPlayer(state: GameState, playerId: number): void
   {
+    console.log(`[Player ${playerId}] Turn complete. Switching to player ${playerId === 1 ? 2 : 1}...`);
     state.currentPlayer = playerId === 1 ? 2 : playerId === 2 ? 1 : null;
   }
 

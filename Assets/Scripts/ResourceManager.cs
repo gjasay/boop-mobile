@@ -5,16 +5,16 @@ public class ResourceManager : MonoBehaviour
     public static ResourceManager Instance { get; private set;} //Singleton instance
 
     [Header("Sprites")]
-    public Sprite OrangeTadpoleSprite; //Reference to the Orange Tadpole sprite
-    public Sprite PurpleTadpoleSprite; //Reference to the Purple Tadpole sprite
-    public Sprite OrangeFrogSprite; //Reference to the Orange Frog sprite
-    public Sprite PurpleFrogSprite; //Reference to the Purple Frog sprite
+    public Sprite OrangeKittenSprite; //Reference to the Orange Tadpole sprite
+    public Sprite GrayKittenSprite; //Reference to the Purple Tadpole sprite
+    public Sprite OrangeCatSprite; //Reference to the Orange Frog sprite
+    public Sprite GrayCatSprite; //Reference to the Purple Frog sprite
 
     [Header("Prefabs")]
-    public GameObject OrangeTadpolePrefab; //Reference to the Orange Tadpole prefab
-    public GameObject PurpleTadpolePrefab; //Reference to the Purple Tadpole prefab
-    public GameObject OrangeFrogPrefab; //Reference to the Orange Frog prefab
-    public GameObject PurpleFrogPrefab; //Reference to the Purple Frog prefab
+    public GameObject OrangeKittenPrefab; //Reference to the Orange Tadpole prefab
+    public GameObject GrayKittenPrefab; //Reference to the Purple Tadpole prefab
+    public GameObject OrangeCatPrefab; //Reference to the Orange Frog prefab
+    public GameObject GrayCatPrefab; //Reference to the Purple Frog prefab
 
     private void Awake()
     {
@@ -39,13 +39,13 @@ public class ResourceManager : MonoBehaviour
         switch (type)
         {
             case GamePieceType.OrangeTadpole:
-                return OrangeTadpoleSprite;
+                return OrangeKittenSprite;
             case GamePieceType.PurpleTadpole:
-                return PurpleTadpoleSprite;
+                return GrayKittenSprite;
             case GamePieceType.OrangeFrog:
-                return OrangeFrogSprite;
+                return OrangeCatSprite;
             case GamePieceType.PurpleFrog:
-                return PurpleFrogSprite;
+                return GrayCatSprite;
             default:
                 Debug.LogError("Invalid game piece type: " + type);
                 return null;
@@ -62,13 +62,13 @@ public class ResourceManager : MonoBehaviour
         switch (type)
         {
             case GamePieceType.OrangeTadpole:
-                return OrangeTadpolePrefab;
+                return OrangeKittenPrefab;
             case GamePieceType.PurpleTadpole:
-                return PurpleTadpolePrefab;
+                return GrayKittenPrefab;
             case GamePieceType.OrangeFrog:
-                return OrangeFrogPrefab;
+                return OrangeCatPrefab;
             case GamePieceType.PurpleFrog:
-                return PurpleFrogPrefab;
+                return GrayCatPrefab;
             default:
                 Debug.LogError("Invalid game piece type: " + type);
                 return null;

@@ -1,0 +1,50 @@
+#root {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background-color: #4f596a;
+}
+
+#title-box {
+  
+}
+
+#title {
+  margin-left: 8px;
+  -unity-font-style: bold;
+  font-size: 350%;
+  color: #3d69b2;
+  -unity-text-outline: 2px #fdfeff;
+}
+
+#button-box {
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  width: 92%;
+  height: 90%;
+  border-width: 2px;
+  border-color: black;
+  border-radius: 30px;
+  background-color: #3c424d;
+  -unity-font-definition: url("../Fonts/DynaPuff.ttf");
+}
+
+.menu-button {
+  border-width: 2px;
+  border-color: black;
+  border-radius: 25px;
+  width: 90%;
+  height: 15%;
+  font-size: 125%;
+  background-color: #adb6da;
+}
+
+.menu-button:hover {
+  background-color: #D9EAD3;
+}
+
+.menu-button:active {
+  background-color: #61A3BA;
+}

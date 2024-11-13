@@ -133,7 +133,7 @@ public class GameboardManager : MonoBehaviour
     gamePiece.SetPieceType("frog");
   }
 
-  private void PlacePiece(int tileX, int tileY, int playerId, string pieceType)
+  public void PlacePiece(int tileX, int tileY, int playerId, string pieceType)
   {
     if (pieceType == "tadpole")
     {
@@ -151,7 +151,7 @@ public class GameboardManager : MonoBehaviour
   private void CreateGameboard(BoardState state)
   {
     Debug.Log("Creating game board");
-    float tileSize = 0.65f;
+    float tileSize = 0.67f;
     GameTiles = new GameTile[state.width, state.height];
 
     float boardWidth = state.width * tileSize;
@@ -265,7 +265,7 @@ public class GameboardManager : MonoBehaviour
         endPosition = new Vector3(startPosition.x + offset, startPosition.y - offset, startPosition.z);
         break;
       default:
-        Debug.LogWarning("Invalid direction");
+        Debug.LogError("Invalid direction");
         endPosition = startPosition;
         break;
     }

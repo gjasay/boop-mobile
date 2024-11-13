@@ -6,6 +6,7 @@ import { Client } from "colyseus";
 import { handlePostPlacement } from "./PostPlacementLogic";
 
 const movingPieces: TileState[] = [];
+let validMove: boolean = false;
 
 /*------------------------------------------------------------------
 * Handle a request to place a piece on the board
@@ -20,6 +21,8 @@ export async function handlePlacementRequest(room: MyRoom, client: Client, piece
   const tile = GameUtils.getTile(state, new ArrayCoordinate(piece.x, piece.y));
   const player = GameUtils.getPlayer(state, piece.playerId);
 
+  console.log(`[Player ${player.id}] Attempting to place ${piece.type} at (${piece.x}, ${piece.y})`);
+
   if (!isValidMove(state, tile, player)) return;
 
   tile.outOfBounds = null;
@@ -32,9 +35,11 @@ export async function handlePlacementRequest(room: MyRoom, client: Client, piece
     handlePostPlacement(room, client, piece);
     movingPieces.length = 0;
     return;
-  } else {
-    console.log(`[Player ${player.id}] Piece does not need to move`);
+  } else if (validMove) {
+    console.log(`[Player ${player.id}] No neighbors found.`);
     handlePostPlacement(room, client, piece);
+  } else {
+    console.log(`[Player ${player.id}] Invalid move`);
   }
 
 }
@@ -45,7 +50,7 @@ async function waitForPiecesToMove(tiles: TileState[]): Promise<void>
   {
     const interval = setInterval(() =>
     {
-      const allMoved = tiles.every((tile) => !tile.gamePiece?.priorCoordinate && !tile.outOfBounds);
+      const allMoved = tiles.every(tile => !tile.gamePiece?.priorCoordinate && !tile.outOfBounds);
       if (allMoved) {
         clearInterval(interval);
         resolve();
@@ -105,6 +110,7 @@ function placePiece(room: MyRoom, tile: TileState, player: PlayerState, pieceTyp
     setPieceOnTile(state, tile, player.id, pieceType);
     player.hand.frogs--;
   } else {
+    validMove = false;
     console.warn(`Invalid move: Player does not have any ${pieceType}s left.`);
   }
 }
@@ -117,11 +123,13 @@ function placePiece(room: MyRoom, tile: TileState, player: PlayerState, pieceTyp
 ----------------------------------------------------------*/
 function setPieceOnTile(state: GameState, tile: TileState, playerId: number, type: string): void
 {
+  validMove = true;
+
   tile.gamePiece = new GamePieceState(tile.position, type, playerId); // Place the piece on the tile
 
-  console.log(`Game piece at transform position: (${tile.gamePiece.position.x}, ${tile.gamePiece.position.y})`);
-
   tile.gamePiece.priorCoordinate = null;
+
+  console.log(`[Player ${playerId}] Placed ${type} at (${tile.arrayPosition.x}, ${tile.arrayPosition.y})`);
 
   //Process game logic
   pushTileNeighbors(state, tile);
@@ -138,12 +146,16 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
 {
   if (!tile) return;
 
+  console.log(`[Player ${tile.gamePiece?.playerId}] Pushing neighbors of (${tile.arrayPosition.x}, ${tile.arrayPosition.y})`);
+
   tile.neighbors.forEach((neighbor) =>
   {
     if (!neighbor) return;
 
     const neighborTile = GameUtils.getTile(state, neighbor);
-    if (!neighborTile || !neighborTile.gamePiece) return;
+
+    if (!neighborTile?.gamePiece) return;
+    if (tile.gamePiece?.type === "tadpole" && neighborTile.gamePiece?.type === "frog") return; // Tadpoles cannot push frogs
 
     const direction = Vector2.Subtract(neighborTile.arrayPosition, tile.arrayPosition) as Vector2;
     const destinationPosition = Vector2.Add(neighborTile.arrayPosition, direction);
@@ -179,7 +191,6 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
     const destinationTile = GameUtils.getTile(state, destinationPosition);
     if (!destinationTile) return;
 
-    if (tile.gamePiece?.type === "tadpole" && neighborTile.gamePiece?.type === "frog") return; // Tadpoles cannot push frogs
 
     if (!destinationTile.gamePiece) {
       movingPieces.push(destinationTile);
@@ -198,6 +209,8 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
 function handleOutOfBounds(state: GameState, tile: TileState, direction: string): void
 {
   if (!tile.gamePiece) return;
+
+  console.log(`[Player ${tile.gamePiece.playerId}] Piece pushed out of bounds at (${tile.arrayPosition.x}, ${tile.arrayPosition.y})`);
 
   switch (tile.gamePiece.type) {
     case "tadpole":

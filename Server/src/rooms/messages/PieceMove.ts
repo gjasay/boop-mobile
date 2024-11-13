@@ -4,7 +4,7 @@ import { GameUtils } from "../utils/GameUtils";
 export function handlePieceMoved(state: GameState, coordinate: Coordinate) {
     const tile = GameUtils.getTile(state, coordinate);
     if (tile && tile.gamePiece) {
-      console.log("Piece moved to: ", coordinate);
+      console.log(`Player ${tile.gamePiece.playerId}'s ${tile.gamePiece.type} moved to (${coordinate.x}, ${coordinate.y})`);
       tile.gamePiece.priorCoordinate = null;
       tile.outOfBounds = null;
     } else if (tile) {

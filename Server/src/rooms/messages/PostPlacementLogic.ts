@@ -18,6 +18,7 @@ export function handlePostPlacement(room: MyRoom, client: Client, piece: PieceMe
     if (neighbor) tilesToCheck.push(neighbor);
   });
 
+  console.log(`[Player ${player.id}] Checking for rows...`);
   checkForRow(state, tilesToCheck);
 
   if (player.hand.tadpoles > 0 || player.hand.frogs > 0) {
@@ -78,34 +79,27 @@ function checkForRow(state: GameState, tiles: TileState[]): void
   {
     if (!tile || !tile.gamePiece) return;
 
-    console.log(`Checking for rows of three for tile ${tile.arrayPosition.x}, ${tile.arrayPosition.y}`);
-
     rowsToTest.forEach((row) =>
     {
       const rowPieces: TileState[] = [tile];
 
       row.forEach((direction) =>
       {
-        console.log(`Checking direction ${direction.x}, ${direction.y} for tile ${tile.arrayPosition.x}, ${tile.arrayPosition.y}`);
         const neighbor = GameUtils.getTile(state, Vector2.Add(tile.arrayPosition, direction));
 
         if (!neighbor) {
-          console.log(`Neighbor ${tile.arrayPosition.x + direction.x}, ${tile.arrayPosition.y + direction.y} does not exist`);
           return;
         };
 
         if (!neighbor.gamePiece) {
-          console.log(`Neighbor ${neighbor.arrayPosition.x}, ${neighbor.arrayPosition.y} does not have a game piece`);
           return;
         }
 
         if (!tile.gamePiece) {
-          console.log(`Tile ${tile.arrayPosition.x}, ${tile.arrayPosition.y} does not have a game piece`);
           return;
         }
 
         if (neighbor.gamePiece.playerId !== tile.gamePiece.playerId) {
-          console.log(`Neighbor ${neighbor.arrayPosition.x}, ${neighbor.arrayPosition.y} is not the same player`);
           return;
         }
 
@@ -145,7 +139,7 @@ function checkForRow(state: GameState, tiles: TileState[]): void
 ----------------------------------------------------------*/
 function handleRowFound(state: GameState, tile: TileState, rowPieces: TileState[]): void
 {
-  console.log(`Row of ${rowPieces.length} found!`);
+  console.log(`Player ${tile.gamePiece.playerId} has a row of three!`);
   const player = GameUtils.getPlayer(state, tile.gamePiece.playerId);
 
   if (rowPieces.every((piece) => piece.gamePiece?.type === "frog")) {
@@ -154,7 +148,6 @@ function handleRowFound(state: GameState, tile: TileState, rowPieces: TileState[
     rowPieces.forEach((piece) =>
     {
       console.log(`Removing piece at ${piece.arrayPosition.x}, ${piece.arrayPosition.y}`);
-
       player.hand.frogs++;
       piece.gamePiece = null;
     });

@@ -1,0 +1,74 @@
+#root {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0);
+  -unity-font-definition: url("../Fonts/DynaPuff.ttf");
+}
+
+#main {
+  width: 100%;
+  height: 92%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.main-box {
+  justify-content: center;
+  align-items: center;
+}
+
+#top-box {
+  height: 14%;
+  width: 95%;
+  top: 2.5%;
+  border-radius: 20px;
+  border-color: black;
+  border-width: 3px;
+  background-color: rgba(60, 66, 77, 1);
+}
+
+#title {
+  color: white;
+  -unity-text-align: middle-center;
+}
+
+#game-box {
+  height: 15%;
+  width: 85%;
+  bottom: 8%;
+  border-radius: 20px;
+  border-color: black;
+  border-width: 3px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0);
+}
+
+.game-piece-box {
+  width: 50%;
+  height: 100%;
+  top: 5%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.piece-count-label {
+  bottom: 30%;
+  left: 5%;
+  font-size: 20px;
+  --unity-font-style: Bold;
+}
+
+#tadpole-image {
+  width: 40px;
+  height: 40px;
+}
+
+#frog-image {
+  width: 40px;
+  height: 40px;
+}

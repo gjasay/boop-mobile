@@ -7,13 +7,15 @@ public class DragHandler : MonoBehaviour
 {
   public DraggableUIGamePiece UIGamePiece { get; set; } //The UI game piece I'm being dragged from
   public GamePieceType TypeOfPiece { get; set; } //The type of game piece
-  private bool _isDragging = true; //True if the piece is being dragged
+  public string PieceType { get; set; } //The type of game piece as a string
   private GameboardManager _gameboardManager; //Reference to the gameboard manager
+  private MainUIEventHandler _uiManager; //Reference to the main UI event handler
 
   // Start is called before the first frame update
   private void Start()
   {
     _gameboardManager = GameboardManager.Instance;
+    _uiManager = GameObject.Find("GameUI").GetComponent<MainUIEventHandler>();
   }
   //Update is called once per frame
   void Update()
@@ -28,7 +30,7 @@ public class DragHandler : MonoBehaviour
    ---------------------------------------------------------------------------------*/
   private void UpdateCurrentPosition()
   {
-    if (!_isDragging)
+    if (!_uiManager.IsDragging)
     {
       SetPieceOnTile();
     }
@@ -69,6 +71,11 @@ public class DragHandler : MonoBehaviour
     }
     transform.position = gameTile.transform.position;
 
+    // if (_uiManager.CanPlacePiece(PieceType)) 
+    // {
+    //   _gameboardManager.PlacePiece(gameTile.ArrayPosition.x, gameTile.ArrayPosition.y, NetworkManager.Instance.PlayerId, PieceType); //Place the piece on the game board
+    // }
+
     SendTilePlacement(gameTile); //Send the placement of the game piece to the server
 
     Destroy(gameObject); //Destroy the game piece
@@ -105,8 +112,8 @@ public class DragHandler : MonoBehaviour
 
       if (touch.phase == TouchPhase.Ended)
       {
-        _isDragging = false;
-        UIGamePiece.IsDragging = false;
+        _uiManager.IsDragging = false;
+        _uiManager.SetUIGamePieces();
         return GetNearestGameTilePosition();
       }
 

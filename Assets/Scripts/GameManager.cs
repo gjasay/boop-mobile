@@ -3,12 +3,26 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    private UIManager _uiManager; // Reference to the UIManager
+    private MenuEventHandler _uiManager; // Reference to the UIManager
     private NetworkManager _networkManager; // Reference to the NetworkManager
+    public static GameManager Instance { get; private set; } // Singleton instance
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
-        _uiManager = GameObject.Find("UI").GetComponent<UIManager>();
+        _uiManager = GameObject.Find("Menu").GetComponent<MenuEventHandler>();
         _networkManager = NetworkManager.Instance;
     }
 
@@ -36,7 +50,7 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene("Main");
 
-        string roomCode = _uiManager.GetRoomCode();   
+        // string roomCode = _uiManager.GetRoomCode();   
 
         SceneManager.sceneLoaded += async (scene, mode) =>
         {
@@ -50,7 +64,29 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            await _networkManager.JoinRoom(roomCode);
+            // Debug.Log("Joining room: " + roomCode);
+
+            await _networkManager.JoinRoom("none yet");
+        };
+    }
+
+    public void FindGame()
+    {
+        SceneManager.LoadScene("Main");
+
+        SceneManager.sceneLoaded += (scene, mode) =>
+        {
+            if (scene.name != "Main") return;
+
+            _networkManager = NetworkManager.Instance;
+
+            if (_networkManager == null)
+            {
+                Debug.LogError("NetworkManager is null");
+                return;
+            }
+
+            _networkManager.JoinOrCreateRoom();
         };
     }
 }

@@ -129,9 +129,4 @@ export class Vector2
     return new Vector2(position.x, position.y);
   }
 
-  public static ToPositionState(vector: Vector2): ArrayCoordinate
-  {
-    return new ArrayCoordinate(vector.x, vector.y);
-  }
-
 }

@@ -18,9 +18,7 @@ public class GamePieceManager : MonoBehaviour
   public GamePieceType OpponentTadpoleType { get; private set; } //The type of tadpole game piece for the opponent
   public GamePieceType OpponentFrogType { get; private set; } //The type of frog game piece for the opponent
 
-  [Header("Draggable UI Game Pieces")]
-  [SerializeField] private DraggableUIGamePiece _tadpoleDraggable;
-  [SerializeField] private DraggableUIGamePiece _frogDraggable;
+  private MainUIEventHandler _uiManager; //Reference to the main UI event handler
 
   private void Awake()
   {
@@ -33,6 +31,11 @@ public class GamePieceManager : MonoBehaviour
     {
       Destroy(gameObject);
     }
+  }
+
+  private void Start()
+  {
+    _uiManager = GameObject.Find("GameUI").GetComponent<MainUIEventHandler>();
   }
 
   /*-------------------------------------------
@@ -52,8 +55,7 @@ public class GamePieceManager : MonoBehaviour
       OpponentTadpoleType = GamePieceType.OrangeTadpole;
     }
 
-    _frogDraggable.SetUIGamePieces();
-    _tadpoleDraggable.SetUIGamePieces();
+    _uiManager.SetUIGamePieces();
   }
 
   /*-------------------------------------------

@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" u="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/Main/GameStyles.uss?fileID=7433441132597879392&amp;guid=42cf9c91470999dad86da7234efb742b&amp;type=3#GameStyles" />
+    <ui:VisualElement name="root">
+        <ui:VisualElement name="main">
+            <ui:Box name="top-box" class="main-box">
+                <ui:Label text="waiting for player to join..." name="title" />
+            </ui:Box>
+            <ui:Box name="game-box">
+                <ui:VisualElement class="game-piece-box">
+                    <ui:Label text="8" name="tadpole-count" class="piece-count-label" />
+                    <ui:Image name="tadpole-image" style="width: 50px;" />
+                </ui:VisualElement>
+                <ui:VisualElement class="game-piece-box">
+                    <ui:Label text="0" name="frog-count" class="piece-count-label" />
+                    <ui:Image name="frog-image" />
+                </ui:VisualElement>
+            </ui:Box>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
