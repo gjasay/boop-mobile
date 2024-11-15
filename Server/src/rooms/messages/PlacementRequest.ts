@@ -8,13 +8,13 @@ import { handlePostPlacement } from "./PostPlacementLogic";
 const movingPieces: TileState[] = [];
 let validMove: boolean = false;
 
-/*------------------------------------------------------------------
+/**-----------------------------------------------------------------
 * Handle a request to place a piece on the board
 * @param x: The x array position of the tile to place the piece on
 * @param y: The y array position of the tile to place the piece on
 * @param pieceType: The type of piece to place
 * @param playerId: The ID of the player placing the piece
---------------------------------------------------------------------*/
+-**-----------------------------------------------------------------*/
 export async function handlePlacementRequest(room: MyRoom, client: Client, piece: PieceMessage): Promise<void>
 {
   const state = room.state;
@@ -59,14 +59,14 @@ async function waitForPiecesToMove(tiles: TileState[]): Promise<void>
   });
 }
 
-/*---------------------------------------------------------
+/**--------------------------------------------------------
 * Check if a move is valid
 * @param state: The current game state
 * @param tile: The tile to place the piece on
 * @param player: The player placing the piece
 * @param playerId: The ID of the player placing the piece
 * @returns True if the move is valid, false otherwise
-----------------------------------------------------------*/
+-**-------------------------------------------------------*/
 function isValidMove(state: GameState, tile: TileState | null, player: PlayerState): boolean
 {
   if (!state.currentPlayer) {
@@ -92,14 +92,14 @@ function isValidMove(state: GameState, tile: TileState | null, player: PlayerSta
   return true;
 }
 
-/*---------------------------------------------------------
+/**--------------------------------------------------------
 * Place a piece on the board
 * @param room: The current room
 * @param client: The client that placed the piece
 * @param tile: The tile to place the piece on
 * @param player: The player placing the piece
 * @param pieceType: The type of piece to place
-----------------------------------------------------------*/
+-**-------------------------------------------------------*/
 function placePiece(room: MyRoom, tile: TileState, player: PlayerState, pieceType: string): void
 {
   const state = room.state;
@@ -115,12 +115,12 @@ function placePiece(room: MyRoom, tile: TileState, player: PlayerState, pieceTyp
   }
 }
 
-/*---------------------------------------------------------
+/**--------------------------------------------------------
 * Place a piece on a tile
 * @param tile: The tile to place the piece on
 * @param playerId: The ID of the player placing the piece
 * @param type: The type of piece to place
-----------------------------------------------------------*/
+-**-------------------------------------------------------*/
 function setPieceOnTile(state: GameState, tile: TileState, playerId: number, type: string): void
 {
   validMove = true;
@@ -137,7 +137,7 @@ function setPieceOnTile(state: GameState, tile: TileState, playerId: number, typ
 
 
 
-/*---------------------------------------------------------
+/**---------------------------------------------------------
 * Push the neighbors of a tile one tile away from the tile
 * @param state: The current game state
 * @param tile: The tile to push the neighbors of
@@ -201,7 +201,7 @@ function pushTileNeighbors(state: GameState, tile: TileState): void
   });
 }
 
-/*----------------------------------------------------------
+/**---------------------------------------------------------
 * Handle a piece being pushed out of bounds
 * @param state: The current game state
 * @param tile: The tile that the piece is being pushed from

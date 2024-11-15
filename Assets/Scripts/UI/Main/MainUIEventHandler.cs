@@ -11,6 +11,7 @@ public class MainUIEventHandler : MonoBehaviour
     private Image _frog;
     private Label _numOfTadpoles;
     private Label _numOfFrogs;
+    private Label _info;
     private ResourceManager _resourceManager;
     private GamePieceManager _gamePieceManager;
     private NetworkManager _networkManager;
@@ -23,6 +24,7 @@ public class MainUIEventHandler : MonoBehaviour
         _networkManager = NetworkManager.Instance;
 
         _networkManager.OnHandChanged += UpdateHandCount;
+        _networkManager.OnPlayerJoined += ClearInfoLabel;
     }
 
     private void OnEnable()
@@ -34,6 +36,7 @@ public class MainUIEventHandler : MonoBehaviour
         _frog = _root.Q<Image>("frog-image");
         _numOfTadpoles = _root.Q<Label>("tadpole-count");
         _numOfFrogs = _root.Q<Label>("frog-count");
+        _info = _root.Q<Label>("info");
 
         //Will using click events cause issues for mobile??
         _tadpole.RegisterCallback((MouseEnterEvent evt, Image root) => HandleTadpoleClick(evt, root), _tadpole);
@@ -42,8 +45,12 @@ public class MainUIEventHandler : MonoBehaviour
 
     public void SetRoomCode(string code)
     {
-        var title = _root.Q<Label>("title");
-        title.text += $"\nRoom Code: {code}";
+        _info.text += $"\nRoom Code: {code}";
+    }
+    
+    public void SetInfoLabel(string info)
+    {
+        _info.text = info;
     }
 
     public void SetUIGamePieces()
@@ -55,16 +62,19 @@ public class MainUIEventHandler : MonoBehaviour
     // check if the player has greater than 0 of the piece
     public bool CanPlacePiece(string type)
     {
-        if (type == "tadpole")
+        switch (type)
         {
-            if (_numOfTadpoles.text == "0") return false;
+            case "tadpole" when _numOfTadpoles.text == "0":
+            case "frog" when _numOfFrogs.text == "0":
+                return false;
+            default:
+                return true;
         }
-        else if (type == "frog")
-        {
-            if (_numOfFrogs.text == "0") return false;
-        }
+    }
 
-        return true;
+    public void ClearInfoLabel()
+    {
+       _info.text = ""; 
     }
 
     private void UpdateHandCount(HandState hand)
@@ -98,7 +108,7 @@ public class MainUIEventHandler : MonoBehaviour
 
         GameObject gamePiece = Instantiate(_prefab, position, Quaternion.identity);
         gamePiece.AddComponent<DragHandler>();
-
+        
         gamePiece.GetComponent<DragHandler>().TypeOfPiece = _gamePieceManager.ClientFrogType;
         gamePiece.GetComponent<DragHandler>().PieceType = "frog";
         IsDragging = true;

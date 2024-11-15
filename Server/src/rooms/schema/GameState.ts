@@ -1,5 +1,4 @@
 import { Schema, ArraySchema, type } from "@colyseus/schema";
-import { Vector2 } from "../utils/Vector2";
 
 /*-------------------
  * Schema Definitions
@@ -81,6 +80,7 @@ export class PlayerState extends Schema
   @type("int32") id: number;
   @type("string") sessionId: string;
   @type(HandState) hand = new HandState();
+  @type("float32") timer = 0;
 
   constructor(id: number)
   {

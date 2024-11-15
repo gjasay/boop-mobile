@@ -25,6 +25,9 @@ public PlayerState() { }
 	[Type(2, "ref", typeof(HandState))]
 	public HandState hand = new HandState();
 
+	[Type(3, "float32")]
+	public float timer = default(float);
+
 	/*
 	 * Support for individual property change callbacks below...
 	 */
@@ -65,11 +68,24 @@ public PlayerState() { }
 		};
 	}
 
+	protected event PropertyChangeHandler<float> __timerChange;
+	public Action OnTimerChange(PropertyChangeHandler<float> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.timer));
+		__timerChange += __handler;
+		if (__immediate && this.timer != default(float)) { __handler(this.timer, default(float)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(timer));
+			__timerChange -= __handler;
+		};
+	}
+
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(id): __idChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			case nameof(sessionId): __sessionIdChange?.Invoke((string) change.Value, (string) change.PreviousValue); break;
 			case nameof(hand): __handChange?.Invoke((HandState) change.Value, (HandState) change.PreviousValue); break;
+			case nameof(timer): __timerChange?.Invoke((float) change.Value, (float) change.PreviousValue); break;
 			default: break;
 		}
 	}

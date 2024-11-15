@@ -1,10 +1,19 @@
 import { GameState, ArrayCoordinate, TileState } from "../schema/GameState";
+import { GameUtils } from "../utils/GameUtils";
 import { Vector2 } from "../utils/Vector2";
 
-/*-------------------------------------
+/**------------------------------------
 * Create the gameboard for the room
 ---------------------------------------*/
-export function createGameboard(state: GameState)
+
+export function initializeRoom(state: GameState, settings: RoomSettings): void
+{
+  createGameboard(state);
+  assignNeighbors(state);
+  setupTimers(state, settings.time);
+}
+
+function createGameboard(state: GameState): void
 {
   const board = state.board;
   board.width = 6;
@@ -21,8 +30,6 @@ export function createGameboard(state: GameState)
       state.board.tiles.push(tile);
     }
   }
-
-  assignNeighbors(state);
 }
 
 function assignNeighbors(state: GameState): void {
@@ -73,4 +80,12 @@ function assignNeighbors(state: GameState): void {
       }
     });
   }
+}
+
+function setupTimers(state: GameState, time: number): void
+{
+  state.playerOne.timer = time;
+  state.playerTwo.timer = time;
+
+  GameUtils.initializePlayerTimers(state);
 }

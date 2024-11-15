@@ -1,23 +1,22 @@
 import { Room, Client } from "@colyseus/core";
 import { GameState } from "./schema/GameState";
-import { createGameboard } from "./messages/CreateGameboard";
+import { initializeRoom } from "./messages/CreateGameboard";
 import { handlePlacementRequest } from "./messages/PlacementRequest";
 import { requestEvolution } from "./messages/EvolutionRequest";
-import { handlePostPlacement } from "./messages/PostPlacementLogic";
-import { assignTilePosition } from "./messages/AssignTilePosition";
 import { handlePieceMoved } from "./messages/PieceMove";
+import { GameUtils } from "./utils/GameUtils";
 
 export class MyRoom extends Room<GameState>
 {
   maxClients = 2;
+  private hostClient: Client | null = null;
 
   //Called when room is initialized
   onCreate(options: any)
   {
-    this.setState(new GameState()); //Set the initial state of the room
+    this.setState(new GameState());
 
-    this.onMessage("createRoom", () => createGameboard(this.state)); //Create the gameboard for the room
-    this.onMessage("assignTilePosition", (client: Client, msg: TilePositionMessage) => assignTilePosition(this.state, msg)); 
+    this.onMessage("createRoom", (_client: Client, msg: RoomSettings) => initializeRoom(this.state, msg));
     this.onMessage("placePiece", (client: Client, msg: PieceMessage) => handlePlacementRequest(this, client, msg));
     this.onMessage("pieceMoved", (_client: Client, msg: Coordinate) => handlePieceMoved(this.state, msg));
     this.onMessage("evolveTadpole", (_client: Client, msg: EvolutionMessage) => requestEvolution(this, msg));
@@ -32,6 +31,16 @@ export class MyRoom extends Room<GameState>
   onJoin(client: Client, options: any)
   {
     console.log(client.sessionId, "joined!");
+
+    if (this.clients.length === 1) {
+      this.hostClient = client;
+    }
+
+    if (this.clients.length === this.maxClients && this.hostClient) {
+      this.hostClient.send("playerJoined");
+
+      GameUtils.startPlayerTimer(this.state, this.state.playerOne);
+    }
   }
 
   onLeave(client: Client, consented: boolean)

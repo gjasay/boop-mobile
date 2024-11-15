@@ -29,7 +29,7 @@
   background-color: rgba(60, 66, 77, 1);
 }
 
-#title {
+#info {
   color: white;
   -unity-text-align: middle-center;
 }
@@ -37,10 +37,9 @@
 #game-box {
   height: 15%;
   width: 85%;
-  bottom: 8%;
   border-radius: 20px;
   border-color: black;
-  border-width: 3px;
+  border-width: 2px;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;

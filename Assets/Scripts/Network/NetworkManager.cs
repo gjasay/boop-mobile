@@ -13,11 +13,9 @@ public class NetworkManager : MonoBehaviour
   public string RoomId { get; private set; } // The room id of the room
 
   /* Events */
-  public event Action<GameState> OnRoomCreated; //Event that is triggered when the room is created
   public event Action<BoardState> OnBoardCreated; //Event that is triggered when the board state changes
+  public event Action OnPlayerJoined;
   public event Action<TileState> OnTileChange; //Event that is triggered when the board state changes
-  public event Action<BoardState> OnPiecePlaced; //Event that is triggered when a piece is placed
-  public event Action<BoardState> OnPostPlacement; //Event that is triggered when a piece is placed
   public event Action<HandState> OnHandChanged; //Event that is triggered when the UI state changes
 
   /* Private variables */
@@ -56,7 +54,7 @@ public class NetworkManager : MonoBehaviour
   {
     _room = await _client.Create<GameState>(roomName); //Create a new room on the server
     RegisterRoomHandlers(); //Register the room handlers
-    await _room.Send("createRoom");
+    await _room.Send("createRoom", new { time = 300 });
 
     GetClientId();
     GetRoomId();
@@ -82,7 +80,7 @@ public class NetworkManager : MonoBehaviour
     GetClientId();
     GetRoomId();
 
-    // _uiManager.DisableRoomCodeText();
+    _uiManager.ClearInfoLabel();
 
     PlayerId = 2;
     InitializeUIListener();
@@ -131,29 +129,28 @@ public class NetworkManager : MonoBehaviour
     {
       if (_room.State.board == null) return;
 
-      if (!_boardCreated)
-      {
-        _boardCreated = true;
-        OnBoardCreated?.Invoke(_room.State.board);
-      }
+      if (_boardCreated) return;
+      _boardCreated = true;
+      OnBoardCreated?.Invoke(_room.State.board);
+    });
+
+    _room.State.playerOne.OnChange(() =>
+    {
+      TimeSpan time = TimeSpan.FromSeconds(_room.State.playerOne.timer);
+      _uiManager.SetInfoLabel($"{time.Minutes}:{time.Seconds}");
     });
 
     /*--------------------------
     * Messages from the server
     ----------------------------*/
-    _room.OnMessage<string>("choosePieceToEvolve", (_msg) =>
+    _room.OnMessage<string>("choosePieceToEvolve", (msg) =>
     {
       _gameboardManager.SelectTadpoleToEvolve();
     });
 
-    _room.OnMessage<string>("piecePlaced", (_msg) =>
+    _room.OnMessage<string>("playerJoined", (msg) =>
     {
-      OnPiecePlaced?.Invoke(_room.State.board);
-    });
-
-    _room.OnMessage<string>("turnComplete", (_msg) =>
-    {
-      OnPostPlacement?.Invoke(_room.State.board);
+      OnPlayerJoined?.Invoke();
     });
   }
 
@@ -199,12 +196,6 @@ public class NetworkManager : MonoBehaviour
   {
     if (NullCheckRoom()) return;
     _room.Send("placePiece", new { x, y, type, playerId = PlayerId });
-  }
-
-  public void SendTileTransform(int arrayX, int arrayY, float transformX, float transformY)
-  {
-    if (NullCheckRoom()) return;
-    _room.Send("assignTilePosition", new { arrayX, arrayY, transformX, transformY });
   }
 
   private void InitializeUIListener()

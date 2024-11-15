@@ -1,8 +1,13 @@
-import { GameState, ArrayCoordinate, TileState } from "../schema/GameState";
+import { GameState, ArrayCoordinate, TileState, PlayerState } from "../schema/GameState";
+import { Timer } from "./Timer";
 import { Vector2 } from "./Vector2";
 
 export class GameUtils
 {
+  static playerOneTimer: Timer;
+  static playerTwoTimer: Timer;
+
+
   /*---------------------------------------------------------
   * Get a player from the game state
   * @param state: The current game state
@@ -52,6 +57,9 @@ export class GameUtils
   static switchPlayer(state: GameState, playerId: number): void
   {
     console.log(`[Player ${playerId}] Turn complete. Switching to player ${playerId === 1 ? 2 : 1}...`);
+
+    this.stopPlayerTimer(this.getPlayer(state, playerId));
+    this.startPlayerTimer(state, this.getPlayer(state, playerId === 1 ? 2 : 1));
     state.currentPlayer = playerId === 1 ? 2 : playerId === 2 ? 1 : null;
   }
 
@@ -59,6 +67,24 @@ export class GameUtils
   {
     state.winner = playerId;
     console.log("Player " + playerId + " wins!");
+  }
+
+  static initializePlayerTimers(state: GameState): void
+  {
+    this.playerOneTimer = new Timer(state.playerOne, state);
+    this.playerTwoTimer = new Timer(state.playerTwo, state);
+  }
+
+  static startPlayerTimer(state: GameState, player: PlayerState): void
+  {
+    if (player.id === 1) this.playerOneTimer.start();
+    else if (player.id === 2) this.playerTwoTimer.start();
+  }
+
+  static stopPlayerTimer(player: PlayerState): void
+  {
+    if (player.id === 1) this.playerOneTimer.stop();
+    else if (player.id === 2) this.playerTwoTimer.stop();
   }
 }
 

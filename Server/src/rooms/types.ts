@@ -1,3 +1,8 @@
+interface RoomSettings
+{
+  time: number;
+}
+
 interface Coordinate
 {
   x: number;

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameboardManager : MonoBehaviour
 {
@@ -10,8 +11,9 @@ public class GameboardManager : MonoBehaviour
   public bool CurrentlyTouchingGameBoard { get; private set; } // True if the player is currently touching the game board
   public GameTile[,] GameTiles { get; private set; } //2D array of GameTile objects
 
+  [FormerlySerializedAs("_gameTilePrefab")]
   [Header("Prefabs")]
-  [SerializeField] private GameObject _gameTilePrefab; //Reference to the GameTile prefab
+  [SerializeField] private GameObject gameTilePrefab; //Reference to the GameTile prefab
 
   //Private variables
   private NetworkManager _networkManager; //Reference to the NetworkManager
@@ -83,19 +85,9 @@ public class GameboardManager : MonoBehaviour
   ----------------------------------------------------------*/
   private void PlaceTadpole(int tileX, int tileY, int playerId)
   {
-    GameObject prefab;
-    GamePieceType type;
+    GamePieceType type = playerId == _networkManager.PlayerId ? _gamePieceManager.ClientTadpoleType : _gamePieceManager.OpponentTadpoleType;
 
-    if (playerId == _networkManager.PlayerId)
-    {
-      type = _gamePieceManager.ClientTadpoleType;
-    }
-    else
-    {
-      type = _gamePieceManager.OpponentTadpoleType;
-    }
-
-    prefab = _resourceManager.GetPrefab(type);
+    GameObject prefab = _resourceManager.GetPrefab(type);
 
     GameTile gameTile = GameTiles[tileX, tileY];
 
@@ -111,19 +103,9 @@ public class GameboardManager : MonoBehaviour
   ----------------------------------------------------------*/
   private void PlaceFrog(int tileX, int tileY, int playerId)
   {
-    GameObject prefab;
-    GamePieceType type;
+    GamePieceType type = playerId == _networkManager.PlayerId ? _gamePieceManager.ClientFrogType : _gamePieceManager.OpponentFrogType;
 
-    if (playerId == _networkManager.PlayerId)
-    {
-      type = _gamePieceManager.ClientFrogType;
-    }
-    else
-    {
-      type = _gamePieceManager.OpponentFrogType;
-    }
-
-    prefab = _resourceManager.GetPrefab(type);
+    GameObject prefab = _resourceManager.GetPrefab(type);
 
     GameTile gameTile = GameTiles[tileX, tileY];
 
@@ -133,15 +115,16 @@ public class GameboardManager : MonoBehaviour
     gamePiece.SetPieceType("frog");
   }
 
-  public void PlacePiece(int tileX, int tileY, int playerId, string pieceType)
+  private void PlacePiece(int tileX, int tileY, int playerId, string pieceType)
   {
-    if (pieceType == "tadpole")
+    switch (pieceType)
     {
-      PlaceTadpole(tileX, tileY, playerId);
-    }
-    else if (pieceType == "frog")
-    {
-      PlaceFrog(tileX, tileY, playerId);
+      case "tadpole":
+        PlaceTadpole(tileX, tileY, playerId);
+        break;
+      case "frog":
+        PlaceFrog(tileX, tileY, playerId);
+        break;
     }
   }
 
@@ -151,7 +134,7 @@ public class GameboardManager : MonoBehaviour
   private void CreateGameboard(BoardState state)
   {
     Debug.Log("Creating game board");
-    float tileSize = 0.67f;
+    const float tileSize = 0.67f;
     GameTiles = new GameTile[state.width, state.height];
 
     float boardWidth = state.width * tileSize;
@@ -163,12 +146,10 @@ public class GameboardManager : MonoBehaviour
     state.tiles.ForEach((tile) =>
     {
       ArrayCoordinate coordinate = tile.arrayPosition;
-      GameTile gameTile = Instantiate(_gameTilePrefab, new Vector3(startX + coordinate.x * tileSize, startY + coordinate.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
+      GameTile gameTile = Instantiate(gameTilePrefab, new Vector3(startX + coordinate.x * tileSize, startY + coordinate.y * tileSize, 0), Quaternion.identity).GetComponent<GameTile>();
       gameTile.ArrayPosition = new Vector2Int(coordinate.x, coordinate.y);
 
       GameTiles[coordinate.x, coordinate.y] = gameTile;
-
-      _networkManager.SendTileTransform(coordinate.x, coordinate.y, gameTile.transform.position.x, gameTile.transform.position.y);
     });
 
     _networkManager.InitializeTileListener();
@@ -178,7 +159,7 @@ public class GameboardManager : MonoBehaviour
   {
     GameTile gameTile = GameTiles[state.arrayPosition.x, state.arrayPosition.y];
 
-    if (state.gamePiece != null && state.gamePiece.type != null && state.gamePiece.priorCoordinate != null && state.gamePiece.priorCoordinate.x != -1 && state.gamePiece.priorCoordinate.y != -1)
+    if (state.gamePiece is { type: not null, priorCoordinate: not null } && state.gamePiece.priorCoordinate.x != -1 && state.gamePiece.priorCoordinate.y != -1)
     {
       GameTile priorGameTile = GameTiles[state.gamePiece.priorCoordinate.x, state.gamePiece.priorCoordinate.y];
       Debug.Log("Moving piece");
@@ -188,7 +169,7 @@ public class GameboardManager : MonoBehaviour
     {
       PlacePiece(state.arrayPosition.x, state.arrayPosition.y, state.gamePiece.playerId, state.gamePiece.type);
     }
-    else if (state.gamePiece == null && state.outOfBounds != null && state.outOfBounds != "")
+    else if (state.gamePiece == null && !string.IsNullOrEmpty(state.outOfBounds))
     {
       Debug.Log("Out of bounds direction: " + state.outOfBounds);
       StartCoroutine(MovePieceOutOfBounds(gameTile, state.outOfBounds, 0.5f));
@@ -201,7 +182,7 @@ public class GameboardManager : MonoBehaviour
 
   IEnumerator MovePieceToTile(GameTile origin, GameTile destination, float duration)
   {
-    if (origin.CurrentlyHeldPiece == null) yield break;
+    if (!origin.CurrentlyHeldPiece) yield break;
     origin.CurrentlyHeldPiece.IsMoving = true;
 
     float time = 0;
@@ -217,7 +198,7 @@ public class GameboardManager : MonoBehaviour
 
     origin.CurrentlyHeldPiece.transform.position = endPosition;
 
-    if (origin.CurrentlyHeldPiece != null)
+    if (origin.CurrentlyHeldPiece)
     {
       origin.CurrentlyHeldPiece.SetTilePlacement(destination);
       origin.CurrentlyHeldPiece = null;
@@ -297,20 +278,11 @@ public class GameboardManager : MonoBehaviour
   -------------------------------------------------------------------------------------------*/
   private void IsPlayerTouchingGameBoard()
   {
-    if (Input.touchCount > 0)
-    {
-      Touch touch = Input.GetTouch(0);
-      Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
-      touchPosition.z = 0;
+    if (Input.touchCount <= 0) return;
+    Touch touch = Input.GetTouch(0);
+    Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
+    touchPosition.z = 0;
 
-      if (Physics2D.OverlapPoint(touchPosition) != null)
-      {
-        CurrentlyTouchingGameBoard = true;
-      }
-      else
-      {
-        CurrentlyTouchingGameBoard = false;
-      }
-    }
+    CurrentlyTouchingGameBoard = Physics2D.OverlapPoint(touchPosition) != null;
   }
 }
