@@ -19,6 +19,7 @@ public class GameboardManager : MonoBehaviour
   private NetworkManager _networkManager; //Reference to the NetworkManager
   private ResourceManager _resourceManager; //Reference to the ResourceManager
   private GamePieceManager _gamePieceManager; //Reference to the GamePieceManager
+  private TouchDetection _touch;
 
   //Awake is called when the script instance is being loaded
   private void Awake()
@@ -41,6 +42,7 @@ public class GameboardManager : MonoBehaviour
     _networkManager = NetworkManager.Instance;
     _resourceManager = ResourceManager.Instance;
     _gamePieceManager = GamePieceManager.Instance;
+    _touch = TouchDetection.Instance;
 
     //Subscribe to events
     _networkManager.OnBoardCreated += CreateGameboard;

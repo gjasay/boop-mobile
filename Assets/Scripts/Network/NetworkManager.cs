@@ -50,11 +50,11 @@ public class NetworkManager : MonoBehaviour
   * @param roomName - The name of the room
   * @return Task - The task to create a room
   -------------------------------------------*/
-  public async Task CreateRoom(string roomName)
+  public async Task CreateRoom(string roomName, int time)
   {
     _room = await _client.Create<GameState>(roomName); //Create a new room on the server
     RegisterRoomHandlers(); //Register the room handlers
-    await _room.Send("createRoom", new { time = 300 });
+    await _room.Send("createRoom", new { time });
 
     GetClientId();
     GetRoomId();
@@ -137,7 +137,7 @@ public class NetworkManager : MonoBehaviour
     _room.State.playerOne.OnChange(() =>
     {
       TimeSpan time = TimeSpan.FromSeconds(_room.State.playerOne.timer);
-      _uiManager.SetInfoLabel($"{time.Minutes}:{time.Seconds}");
+      _uiManager.SetInfoLabel($"{time.Minutes}:{time.Seconds:D2}");
     });
 
     /*--------------------------
@@ -246,11 +246,8 @@ public class NetworkManager : MonoBehaviour
   ----------------------------*/
   private bool NullCheckRoom()
   {
-    if (_room == null)
-    {
-      Debug.LogError("Room is null");
-      return true;
-    }
-    return false;
+    if (_room != null) return false;
+    Debug.LogError("Room is null");
+    return true;
   }
 }

@@ -1,14 +1,46 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" u="UnityEngine.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/Scripts/UI/style.uss?fileID=7433441132597879392&amp;guid=2f5299a276643e1768e7b9b8595518cd&amp;type=3#style" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" u="UnityEngine.UIElements"
+         editor-extension-mode="False">
+    <Style
+        src="project://database/Assets/Scripts/UI/style.uss?fileID=7433441132597879392&amp;guid=2f5299a276643e1768e7b9b8595518cd&amp;type=3#style" />
     <ui:VisualElement name="root">
-            <ui:Box name="button-box">
+        <ui:Box name="button-box">
             <ui:VisualElement name="title-box">
                 <ui:Label text="boop." name="title" />
             </ui:VisualElement>
-                <ui:Button text="Create Game" name="create-button" class="menu-button" />
-                <ui:Button text="Join Game" name="join-button" class="menu-button" />
-                <ui:Button text="Find Game" name="find-button" class="menu-button" />
-                <ui:Button text="Settings" name="settings-button" class="menu-button" />
+            <ui:Button text="Create Game" name="create-button" class="menu-button" />
+            <ui:Button text="Join Game" name="join-button" class="menu-button" />
+            <ui:Button text="Find Game" name="find-button" class="menu-button" />
+            <ui:Button text="Settings" name="settings-button" class="menu-button" />
+        </ui:Box>
+        <ui:Box name="create-box" class="additional-options-box">
+            <ui:Box name="timer-box">
+                <ui:Label text="Timer: " name="timer-label" />
+                <ui:RadioButtonGroup name="timer-radio-group">
+                    <ui:RadioButton name="five-minutes" text="5 minutes" class="timer-radio" />
+                    <ui:RadioButton name="ten-minutes" text="10 minutes" class="timer-radio" />
+                    <ui:RadioButton name="fifteen-minutes" text="15 minutes" class="timer-radio" />
+                    <ui:RadioButton name="twenty-minutes" text="20 minutes" class="timer-radio" />
+                    <ui:RadioButton name="thirty-minutes" text="30 minutes" class="timer-radio" />
+                </ui:RadioButtonGroup>
             </ui:Box>
+
+            <ui:Button text="Create" name="create-submit-button" class="menu-button" />
+            <ui:Button text="Back" name="create-back-button" class="menu-button" />
+        </ui:Box>
+        <ui:Box name="join-box" class="additional-options-box">
+            <ui:Button text="Join" name="join-submit-button" class="menu-button" />
+            <ui:Button text="Back" name="join-back-button" class="menu-button" />
+        </ui:Box>
+        <ui:Box name="find-box" class="additional-options-box">
+            <ui:Button text="Find" name="find-submit-button" class="menu-button" />
+            <ui:Button text="Back" name="find-back-button" class="menu-button" />
+        </ui:Box>
+        <ui:Box name="settings-box" class="additional-options-box">
+            <ui:Button text="Save" name="save-button" class="menu-button" />
+            <ui:Button text="Load" name="load-button" class="menu-button" />
+            <ui:Button text="Reset" name="reset-button" class="menu-button" />
+            <ui:Button text="Back" name="settings-back-button" class="menu-button" />
+        </ui:Box>
+
     </ui:VisualElement>
 </ui:UXML>

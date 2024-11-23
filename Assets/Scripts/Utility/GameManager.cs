@@ -3,7 +3,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    private MenuEventHandler _uiManager; // Reference to the UIManager
     private NetworkManager _networkManager; // Reference to the NetworkManager
     public static GameManager Instance { get; private set; } // Singleton instance
 
@@ -22,11 +21,10 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        _uiManager = GameObject.Find("Menu").GetComponent<MenuEventHandler>();
         _networkManager = NetworkManager.Instance;
     }
 
-    public void CreateGame()
+    public void CreateGame(int time)
     {
         SceneManager.LoadScene("Main");
 
@@ -42,7 +40,7 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            await _networkManager.CreateRoom("my_room");
+            await _networkManager.CreateRoom("my_room", time);
         };
     }
 
@@ -86,7 +84,7 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            _networkManager.JoinOrCreateRoom();
+            _ = _networkManager.JoinOrCreateRoom();
         };
     }
 }
