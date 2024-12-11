@@ -17,7 +17,6 @@ export class Timer
   {
     this.timer = setInterval(() => {
       this.player.timer -= 0.01;
-      console.log("Player " + this.player.id + " time: " + this.player.timer);
 
       if (this.player.timer <= 0) {
         console.log("Player " + this.player.id + " ran out of time!");
