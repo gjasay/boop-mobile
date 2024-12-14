@@ -1,14 +1,16 @@
 using System;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
+using Unity.Services.Authentication.PlayerAccounts;
 using Unity.Services.Core;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AuthManager : MonoBehaviour
 {
     public static AuthManager Instance { get; private set; }
 
-    async void Awake()
+    private async void Awake()
     {
         if (Instance == null)
         {
@@ -19,53 +21,58 @@ public class AuthManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        try
-        {
-            await UnityServices.InitializeAsync();
-            SetupEvents();
-        }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-        }
+
+        await UnityServices.InitializeAsync();
+        PlayerAccountService.Instance.SignedIn += SignedIn;
     }
 
-    public async Task SignInAsGuest()
+    private async void SignedIn()
     {
         try
         {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            Debug.Log($"PlayerID {AuthenticationService.Instance.PlayerId}: Signed in as guest");
+            var accessToken = PlayerAccountService.Instance.AccessToken;
+            await SignInWithUnityAsync(accessToken);
+            CheckFirstSignIn();
+            SceneManager.LoadScene(1);
         }
-        catch (AuthenticationException e)
+        catch (Exception ex)
         {
-            Debug.LogException(e);
-        }
-        catch (RequestFailedException e)
-        {
-            Debug.LogException(e);
+            Debug.Log(ex.Message);
         }
     }
 
-    private void SetupEvents()
+    public async Task SignIn()
     {
-        AuthenticationService.Instance.SignedIn += () =>
+        await PlayerAccountService.Instance.StartSignInAsync();
+    }
+
+    private async Task SignInWithUnityAsync(string accessToken)
+    {
+        try
         {
-            Debug.Log($"PlayerID: {AuthenticationService.Instance.PlayerId}");
-
-            Debug.Log($"AccessToken: {AuthenticationService.Instance.AccessToken}");
-        };
-
-        AuthenticationService.Instance.SignInFailed += Debug.LogError;
-
-        AuthenticationService.Instance.SignedOut += () =>
+            await AuthenticationService.Instance.SignInWithUnityAsync(accessToken);
+            Debug.Log("SignIn is successful.");
+        }
+        catch (AuthenticationException ex)
         {
-            Debug.Log("Player has signed out successfully");
-        };
-
-        AuthenticationService.Instance.Expired += () =>
+            Debug.LogException(ex);
+        }
+        catch (RequestFailedException ex)
         {
-            Debug.Log("Player session has expired");
-        };
+            Debug.LogException(ex);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        PlayerAccountService.Instance.SignedIn -= SignedIn;
+    }
+
+    private void CheckFirstSignIn()
+    {
+        if (AuthenticationService.Instance.PlayerName == null)
+        {
+            Debug.Log("This is the first sign-in.");
+        }
     }
 }
