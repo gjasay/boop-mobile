@@ -17,6 +17,9 @@ public class NetworkManager : MonoBehaviour
   public event Action OnPlayerJoined;
   public event Action<TileState> OnTileChange; //Event that is triggered when the board state changes
   public event Action<HandState> OnHandChanged; //Event that is triggered when the UI state changes
+  public event Action<PlayerState> OnClientUpdate; //Event that is triggered when the client player state changes
+  public event Action<PlayerState> OnOpponentUpdate; //Event that is triggered when the opponent player state changes
+  public event Action<int> OnPlayerWin; //Event that is triggered when a player wins
 
   /* Private variables */
   private bool _boardCreated = false;
@@ -59,8 +62,6 @@ public class NetworkManager : MonoBehaviour
     GetClientId();
     GetRoomId();
 
-    _uiManager.SetRoomCode(RoomId);
-
     PlayerId = 1;
     InitializeUIListener();
     GamePieceManager.Instance.SetFrogType(PlayerId);
@@ -79,8 +80,6 @@ public class NetworkManager : MonoBehaviour
 
     GetClientId();
     GetRoomId();
-
-    _uiManager.ClearInfoLabel();
 
     PlayerId = 2;
     InitializeUIListener();
@@ -105,6 +104,19 @@ public class NetworkManager : MonoBehaviour
     InitializeUIListener();
     GamePieceManager.Instance.SetFrogType(PlayerId);
     GamePieceManager.Instance.SetTadpoleType(PlayerId);
+  }
+  
+  public void LeaveRoom()
+  {
+    if (NullCheckRoom()) return;
+    _room.Leave();
+  }
+  
+  public void ReconnectToRoom()
+  {
+    if (NullCheckRoom()) return;
+    // _room.Connect();
+    Debug.Log("Reconnecting to room");
   }
 
   /*-------------------------------
@@ -134,24 +146,30 @@ public class NetworkManager : MonoBehaviour
       OnBoardCreated?.Invoke(_room.State.board);
     });
 
+    _room.State.OnWinnerChange((value, prev) => { OnPlayerWin?.Invoke(value); });
+
     _room.State.playerOne.OnChange(() =>
     {
-      TimeSpan time = TimeSpan.FromSeconds(_room.State.playerOne.timer);
-      _uiManager.SetInfoLabel($"{time.Minutes}:{time.Seconds:D2}");
+      if (PlayerId == 1)
+        OnClientUpdate?.Invoke(_room.State.playerOne);
+      else
+        OnOpponentUpdate?.Invoke(_room.State.playerOne);
     });
-
+    
+    _room.State.playerTwo.OnChange(() =>
+    {
+      if (PlayerId == 2)
+        OnClientUpdate?.Invoke(_room.State.playerTwo);
+      else
+        OnOpponentUpdate?.Invoke(_room.State.playerTwo);
+    });
+    
     /*--------------------------
     * Messages from the server
     ----------------------------*/
-    _room.OnMessage<string>("choosePieceToEvolve", (msg) =>
-    {
-      _gameboardManager.SelectTadpoleToEvolve();
-    });
+    _room.OnMessage<string>("choosePieceToEvolve", (msg) => { _gameboardManager.SelectTadpoleToEvolve(); });
 
-    _room.OnMessage<string>("playerJoined", (msg) =>
-    {
-      OnPlayerJoined?.Invoke();
-    });
+    _room.OnMessage<string>("playerJoined", (msg) => { OnPlayerJoined?.Invoke(); });
   }
 
   public void SendEvolvingTadpole(int x, int y)
@@ -175,7 +193,9 @@ public class NetworkManager : MonoBehaviour
     {
       tile.OnChange(() =>
       {
-        OnTileChange?.Invoke(_room.State.board.tiles[tile.arrayPosition.y * _room.State.board.width + tile.arrayPosition.x]);
+        OnTileChange?.Invoke(
+          _room.State.board.tiles[
+            tile.arrayPosition.y * _room.State.board.width + tile.arrayPosition.x]);
       });
     });
   }
@@ -206,16 +226,10 @@ public class NetworkManager : MonoBehaviour
     switch (PlayerId)
     {
       case 1:
-        _room.State.playerOne.hand.OnChange(() =>
-        {
-          OnHandChanged?.Invoke(_room.State.playerOne.hand);
-        });
+        _room.State.playerOne.hand.OnChange(() => { OnHandChanged?.Invoke(_room.State.playerOne.hand); });
         break;
       case 2:
-        _room.State.playerTwo.hand.OnChange(() =>
-        {
-          OnHandChanged?.Invoke(_room.State.playerTwo.hand);
-        });
+        _room.State.playerTwo.hand.OnChange(() => { OnHandChanged?.Invoke(_room.State.playerTwo.hand); });
         break;
       default:
         Debug.LogError("Player id is not set");

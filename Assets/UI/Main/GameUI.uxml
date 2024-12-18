@@ -1,22 +1,43 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" u="UnityEngine.UIElements"
          editor-extension-mode="False">
-  <Style
+    <Style
         src="project://database/Assets/Scripts/UI/Main/GameStyles.uss?fileID=7433441132597879392&amp;guid=42cf9c91470999dad86da7234efb742b&amp;type=3#GameStyles" />
-  <ui:VisualElement name="root">
-    <ui:VisualElement name="main">
-      <ui:Box name="top-box" class="main-box">
-        <ui:Label text="loading board..." name="info" />
-      </ui:Box>
-      <ui:Box name="game-box">
-        <ui:VisualElement class="game-piece-box">
-          <ui:Label text="8" name="tadpole-count" class="piece-count-label" />
-          <ui:Image name="tadpole-image" style="width: 50px;" />
+    <ui:VisualElement name="root">
+        <ui:VisualElement name="main">
+            <ui:Box name="top-box" class="main-box">
+                <ui:VisualElement name="opponent-info" class="">
+                    <ui:Label name="opponent-name" text="jane_doe" />
+                    <ui:Label name="opponent-timer" text="5:00" />
+                </ui:VisualElement>
+                <!-- <ui:Label text="loading board..." name="info" /> -->
+            </ui:Box>
+            <ui:Box name="bottom-box">
+                <ui:VisualElement name="player-info" class="">
+                    <ui:Label name="player-name" text="john_doe" />
+                    <ui:Label name="player-timer" text="5:00" />
+                </ui:VisualElement>
+                <ui:VisualElement name="game-piece-container" class="main-box">
+                    <ui:VisualElement class="game-piece-box">
+                        <ui:Label text="8" name="tadpole-count" class="piece-count-label" />
+                        <ui:Image name="tadpole-image" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="game-piece-box">
+                        <ui:Label text="0" name="frog-count" class="piece-count-label" />
+                        <ui:Image name="frog-image" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:Box>
+            <ui:Box name="lobby-box" class="hidden-box">
+                <ui:Label text="waiting for opponent..." name="lobby-info" />
+                <ui:Label text="room code: 123456" name="room-code" />
+                <ui:Button text="Copy Link" name="copy-link-button" />
+                <ui:Button text="Cancel" name="cancel-button" />
+            </ui:Box>
+            <ui:Box name="result-box" class="hidden-box">
+                <ui:Label text="result" name="result" />
+                <ui:Button text="Play Again" name="play-again-button" class="menu-button" />
+                <ui:Button text="Main Menu" name="main-menu-button" class="menu-button" />
+            </ui:Box>
         </ui:VisualElement>
-        <ui:VisualElement class="game-piece-box">
-          <ui:Label text="0" name="frog-count" class="piece-count-label" />
-          <ui:Image name="frog-image" />
-        </ui:VisualElement>
-      </ui:Box>
     </ui:VisualElement>
-  </ui:VisualElement>
 </ui:UXML>

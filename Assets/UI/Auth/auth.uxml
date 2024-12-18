@@ -6,20 +6,11 @@
         <ui:Box name="main">
             <ui:Label text="boop." name="title" />
             <ui:VisualElement name="socials">
-                <ui:Button name="fb" class="social-button">
-                    <ui:Label text="&#xf09a;" />
-                    <ui:Label text="Continue with Facebook" class="social-label" />
-                </ui:Button>
-                <ui:Button name="google" class="social-button">
-                    <ui:Label text="&#xf1a0;" />
-                    <ui:Label text="Continue with Google" class="social-label" />
-                </ui:Button>
-                <ui:Button name="apple" class="social-button">
-                    <ui:Label text="&#xf179;" />
-                    <ui:Label text="Continue with Apple" class="social-label" />
+                <ui:Button name="sign-in" class="social-button">
+                    <ui:Label text="Sign in" class="social-label" />
                 </ui:Button>
                 <ui:Button name="guest" class="social-button">
-                    <ui:Label text="Play as guest" />
+                  <ui:Label text="Play as guest" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:Box>

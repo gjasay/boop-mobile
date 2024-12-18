@@ -46,6 +46,11 @@ public class AuthManager : MonoBehaviour
         await PlayerAccountService.Instance.StartSignInAsync();
     }
 
+    public async Task SignInAsGuest()
+    {
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+    }
+    
     private async Task SignInWithUnityAsync(string accessToken)
     {
         try

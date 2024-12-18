@@ -1,17 +1,25 @@
+using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class MainUIEventHandler : MonoBehaviour
 {
   public bool IsDragging { get; set; }
-    
+
   private UIDocument _document;
   private VisualElement _root;
-  private Image _tadpole;
-  private Image _frog;
-  private Label _numOfTadpoles;
-  private Label _numOfFrogs;
-  private Label _info;
+  private Image _kitten;
+  private Image _cat;
+  private Label _numOfKittens;
+  private Label _numOfCats;
+  private Label _resultText;
+  private Label _playerTimer;
+  private Label _opponentTimer;
+  private Box _resultBox;
+  private Box _lobbyBox;
+  private Button _playAgainButton;
+  private Button _mainMenuButton;
   private ResourceManager _resourceManager;
   private GamePieceManager _gamePieceManager;
   private NetworkManager _networkManager;
@@ -26,7 +34,17 @@ public class MainUIEventHandler : MonoBehaviour
     _touch = TouchDetection.Instance;
 
     _networkManager.OnHandChanged += UpdateHandCount;
-    _networkManager.OnPlayerJoined += ClearInfoLabel;
+    _networkManager.OnPlayerWin += HandlePlayerWin;
+    _networkManager.OnClientUpdate += UpdatePlayerTimer;
+    _networkManager.OnOpponentUpdate += UpdateOpponentTimer;
+  }
+
+  private void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.Space))
+    {
+      _lobbyBox.ToggleInClassList("visible");
+    }
   }
 
   private void OnEnable()
@@ -34,31 +52,33 @@ public class MainUIEventHandler : MonoBehaviour
     _document = GetComponent<UIDocument>();
     _root = _document.rootVisualElement;
 
-    _tadpole = _root.Q<Image>("tadpole-image");
-    _frog = _root.Q<Image>("frog-image");
-    _numOfTadpoles = _root.Q<Label>("tadpole-count");
-    _numOfFrogs = _root.Q<Label>("frog-count");
-    _info = _root.Q<Label>("info");
+    _kitten = _root.Q<Image>("tadpole-image");
+    _cat = _root.Q<Image>("frog-image");
 
-    //Will using click events cause issues for mobile??
-    _tadpole.RegisterCallback((PointerEnterEvent evt, Image root) => HandleTadpoleClick(evt, root), _tadpole);
-    _frog.RegisterCallback((PointerEnterEvent evt, Image root) => HandleFrogClick(evt, root), _frog);
-  }
+    _numOfKittens = _root.Q<Label>("tadpole-count");
+    _numOfCats = _root.Q<Label>("frog-count");
 
-  public void SetRoomCode(string code)
-  {
-    _info.text += $"\nRoom Code: {code}";
-  }
-    
-  public void SetInfoLabel(string info)
-  {
-    _info.text = info;
+    _playerTimer = _root.Q<Label>("player-timer");
+    _opponentTimer = _root.Q<Label>("opponent-timer");
+
+    _resultText = _root.Q<Label>("result");
+
+    _resultBox = _root.Q<Box>("result-box");
+    _lobbyBox = _root.Q<Box>("lobby-box");
+
+    _playAgainButton = _root.Q<Button>("play-again-button");
+    _mainMenuButton = _root.Q<Button>("main-menu-button");
+
+    _kitten.RegisterCallback((PointerEnterEvent evt, Image root) => HandleTadpoleClick(evt, root), _kitten);
+    _cat.RegisterCallback((PointerEnterEvent evt, Image root) => HandleFrogClick(evt, root), _cat);
+
+    _mainMenuButton.clicked += () => { SceneManager.LoadScene(1); };
   }
 
   public void SetUIGamePieces()
   {
-    _tadpole.sprite = _resourceManager.GetSprite(_gamePieceManager.ClientTadpoleType);
-    _frog.sprite = _resourceManager.GetSprite(_gamePieceManager.ClientFrogType);
+    _kitten.sprite = _resourceManager.GetSprite(_gamePieceManager.ClientTadpoleType);
+    _cat.sprite = _resourceManager.GetSprite(_gamePieceManager.ClientFrogType);
   }
 
   // check if the player has greater than 0 of the piece
@@ -66,30 +86,41 @@ public class MainUIEventHandler : MonoBehaviour
   {
     switch (type)
     {
-      case "tadpole" when _numOfTadpoles.text == "0":
-      case "frog" when _numOfFrogs.text == "0":
+      case "tadpole" when _numOfKittens.text == "0":
+      case "frog" when _numOfCats.text == "0":
         return false;
       default:
         return true;
     }
   }
 
-  public void ClearInfoLabel()
+  private void UpdatePlayerTimer(PlayerState state)
   {
-    _info.text = ""; 
+    TimeSpan time = TimeSpan.FromSeconds(state.timer);
+    _playerTimer.text = $"{time.Minutes}:{time.Seconds:D2}";
+  }
+
+  private void UpdateOpponentTimer(PlayerState state)
+  {
+    TimeSpan time = TimeSpan.FromSeconds(state.timer);
+    _opponentTimer.text = $"{time.Minutes}:{time.Seconds:D2}";
+  }
+
+  private void HandlePlayerWin(int playerId)
+  {
+    _resultText.text = playerId == _networkManager.PlayerId ? "You Win!" : "You Lose!";
+    _resultBox.ToggleInClassList("visible");
   }
 
   private void UpdateHandCount(HandState hand)
   {
-    _numOfTadpoles.text = hand.tadpoles.ToString();
-    _numOfFrogs.text = hand.frogs.ToString();
+    _numOfKittens.text = hand.tadpoles.ToString();
+    _numOfCats.text = hand.frogs.ToString();
   }
-  
+
   private void HandleTadpoleClick(PointerEnterEvent evt, Image root)
   {
-    Debug.Log("Tadpole click");
     if (!_networkManager.IsPlayerTurn() || IsDragging) return;
-    Debug.Log("Tadpole clicked");
     _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientTadpoleType);
     Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -105,13 +136,12 @@ public class MainUIEventHandler : MonoBehaviour
   private void HandleFrogClick(PointerEnterEvent evt, Image root)
   {
     if (!_networkManager.IsPlayerTurn() || IsDragging) return;
-    Debug.Log("Frog clicked");
     _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientFrogType);
     Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
     GameObject gamePiece = Instantiate(_prefab, position, Quaternion.identity);
     gamePiece.AddComponent<DragHandler>();
-        
+
     gamePiece.GetComponent<DragHandler>().TypeOfPiece = _gamePieceManager.ClientFrogType;
     gamePiece.GetComponent<DragHandler>().PieceType = "frog";
     IsDragging = true;

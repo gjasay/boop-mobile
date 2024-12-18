@@ -1,73 +1,145 @@
 #root {
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0);
-  -unity-font-definition: url("../Fonts/DynaPuff.ttf");
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-font-definition: url("../Fonts/DynaPuff.ttf");
 }
 
 #main {
-  width: 100%;
-  height: 92%;
-  justify-content: space-between;
-  align-items: center;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .main-box {
-  justify-content: center;
-  align-items: center;
+    justify-content: center;
+    align-items: center;
 }
 
 #top-box {
-  height: 14%;
-  width: 95%;
-  top: 2.5%;
-  border-radius: 20px;
-  border-color: black;
-  border-width: 3px;
-  background-color: rgba(60, 66, 77, 1);
+    height: 12%;
+    width: 100%;
+    color: white;
+    background-color: rgba(60, 66, 77, 1);
+    border-bottom-width: 30px;
+    border-color: black;
 }
 
 #info {
-  color: white;
-  -unity-text-align: middle-center;
+    color: white;
+    font-size: 110px;
+    -unity-text-align: middle-center;
 }
 
-#game-box {
-  height: 15%;
-  width: 85%;
-  border-radius: 20px;
-  border-color: black;
-  border-width: 2px;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0);
+#bottom-box {
+    height: 20%;
+    width: 100%;
+    color: white;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
 }
 
-.game-piece-box {
-  width: 50%;
-  height: 100%;
-  top: 5%;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
+#player-info {
+    width: 100%;
+    height: 50%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 110px;
+    background-color: rgba(60, 66, 77, 1);
+    border-top-width: 30px;
+    border-color: black;
 }
 
-.piece-count-label {
-  bottom: 30%;
-  left: 5%;
-  font-size: 20px;
-  --unity-font-style: Bold;
+#opponent-info {
+    width: 100%;
+    height: 50%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 110px;
+    background-color: rgba(60, 66, 77, 1);
+}
+
+#opponent-timer {
+    font-size: 125px;
+}
+
+#player-timer {
+    font-size: 125px;
+}
+
+#game-piece-container {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
 #tadpole-image {
-  width: 40px;
-  height: 40px;
+    width: 400px;
+    height: 400px;
 }
 
 #frog-image {
-  width: 40px;
-  height: 40px;
+    width: 400px;
+    height: 400px;
+}
+
+#lobby-box {
+    width: 100%;
+    height: 100%;
+    bottom: 100%;
+    scale: 1;
+    background-color: rgba(60, 66, 77, 1);
+    transition: bottom 0.35s ease-out 0s;
+}
+
+#lobby-box.visible {
+    bottom: 0;
+}
+
+.hidden-box {
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
+    font-size: 200px;
+    width: 90%;
+    height: 90%;
+    display: flex;
+    scale: 0;
+    transition: scale 0.55s ease-out-back 0s;
+}
+
+.hidden-box.visible {
+    scale: 1;
+}
+
+.menu-button {
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: black;
+}
+
+.game-piece-box {
+    width: 50%;
+    height: 100%;
+    top: 5%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.piece-count-label {
+    bottom: 30%;
+    font-size: 150px;
+    --unity-font-style: Bold;
 }
