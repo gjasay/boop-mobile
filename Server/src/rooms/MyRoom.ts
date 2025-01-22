@@ -3,22 +3,24 @@ import { GameState } from "./schema/GameState";
 import { initializeRoom } from "./messages/CreateGameboard";
 import { handlePlacementRequest } from "./messages/PlacementRequest";
 import { requestEvolution } from "./messages/EvolutionRequest";
-import { handlePieceMoved } from "./messages/PieceMove";
-import { GameUtils } from "./utils/GameUtils";
+import {Queue} from "./utils/Queue";
+import { Timer } from "./utils/Timer";
 
 export class MyRoom extends Room<GameState>
 {
-  maxClients = 2;
-  private hostClient: Client | null = null;
+  public maxClients = 2;
+  public animationQueue: Queue = new Queue();
+  public hostClient: Client | null = null;
+  public roomInitialized = false;
+  public playerOneTimer: Timer | null = null;
+  public playerTwoTimer: Timer | null = null;
 
-  //Called when room is initialized
-  onCreate(options: any)
+  onCreate(options: { time: number })
   {
     this.setState(new GameState());
 
-    this.onMessage("createRoom", (_client: Client, msg: RoomSettings) => initializeRoom(this.state, msg));
+    initializeRoom(this, options);
     this.onMessage("placePiece", (client: Client, msg: PieceMessage) => handlePlacementRequest(this, client, msg));
-    this.onMessage("pieceMoved", (_client: Client, msg: Coordinate) => handlePieceMoved(this.state, msg));
     this.onMessage("evolveTadpole", (_client: Client, msg: EvolutionMessage) => requestEvolution(this, msg));
   }
 
@@ -28,18 +30,17 @@ export class MyRoom extends Room<GameState>
   }
 
   /*-------------Colyseus Room Lifecycle Functions-----------------*/
-  onJoin(client: Client, options: any)
+  onJoin(client: Client, options: { time: number })
   {
     console.log(client.sessionId, "joined!");
 
     if (this.clients.length === 1) {
       this.hostClient = client;
+      client.send("playerId", 1);
     }
 
     if (this.clients.length === this.maxClients && this.hostClient) {
-      this.hostClient.send("playerJoined");
-
-      GameUtils.startPlayerTimer(this.state, this.state.playerOne);
+      client.send("playerId", 2);
     }
   }
 

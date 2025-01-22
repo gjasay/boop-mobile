@@ -16,44 +16,44 @@ public partial class HandState : Schema {
 [Preserve] 
 #endif
 public HandState() { }
-	[Type(0, "int32")]
-	public int tadpoles = default(int);
+	[Type(0, "int8")]
+	public sbyte kittens = default(sbyte);
 
-	[Type(1, "int32")]
-	public int frogs = default(int);
+	[Type(1, "int8")]
+	public sbyte cats = default(sbyte);
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<int> __tadpolesChange;
-	public Action OnTadpolesChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<sbyte> __kittensChange;
+	public Action OnKittensChange(PropertyChangeHandler<sbyte> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.tadpoles));
-		__tadpolesChange += __handler;
-		if (__immediate && this.tadpoles != default(int)) { __handler(this.tadpoles, default(int)); }
+		__callbacks.AddPropertyCallback(nameof(this.kittens));
+		__kittensChange += __handler;
+		if (__immediate && this.kittens != default(sbyte)) { __handler(this.kittens, default(sbyte)); }
 		return () => {
-			__callbacks.RemovePropertyCallback(nameof(tadpoles));
-			__tadpolesChange -= __handler;
+			__callbacks.RemovePropertyCallback(nameof(kittens));
+			__kittensChange -= __handler;
 		};
 	}
 
-	protected event PropertyChangeHandler<int> __frogsChange;
-	public Action OnFrogsChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<sbyte> __catsChange;
+	public Action OnCatsChange(PropertyChangeHandler<sbyte> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.frogs));
-		__frogsChange += __handler;
-		if (__immediate && this.frogs != default(int)) { __handler(this.frogs, default(int)); }
+		__callbacks.AddPropertyCallback(nameof(this.cats));
+		__catsChange += __handler;
+		if (__immediate && this.cats != default(sbyte)) { __handler(this.cats, default(sbyte)); }
 		return () => {
-			__callbacks.RemovePropertyCallback(nameof(frogs));
-			__frogsChange -= __handler;
+			__callbacks.RemovePropertyCallback(nameof(cats));
+			__catsChange -= __handler;
 		};
 	}
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(tadpoles): __tadpolesChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
-			case nameof(frogs): __frogsChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
+			case nameof(kittens): __kittensChange?.Invoke((sbyte) change.Value, (sbyte) change.PreviousValue); break;
+			case nameof(cats): __catsChange?.Invoke((sbyte) change.Value, (sbyte) change.PreviousValue); break;
 			default: break;
 		}
 	}

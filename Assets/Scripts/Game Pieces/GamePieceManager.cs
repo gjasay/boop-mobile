@@ -2,10 +2,10 @@ using UnityEngine;
 
 public enum GamePieceType
 {
-  OrangeTadpole,
-  PurpleTadpole,
-  OrangeFrog,
-  PurpleFrog
+  OrangeKitten,
+  GrayKitten,
+  OrangeCat,
+  GrayCat
 }
 
 public class GamePieceManager : MonoBehaviour
@@ -13,10 +13,10 @@ public class GamePieceManager : MonoBehaviour
   public static GamePieceManager Instance { get; private set; } //Singleton instance
 
   //Properties
-  public GamePieceType ClientTadpoleType { get; private set; } //The type of tadpole game piece
-  public GamePieceType ClientFrogType { get; private set; } //The type of frog game piece
-  public GamePieceType OpponentTadpoleType { get; private set; } //The type of tadpole game piece for the opponent
-  public GamePieceType OpponentFrogType { get; private set; } //The type of frog game piece for the opponent
+  public GamePieceType ClientKittenType { get; private set; } //The type of tadpole game piece
+  public GamePieceType ClientCatType { get; private set; } //The type of frog game piece
+  public GamePieceType OpponentKittenType { get; private set; } //The type of tadpole game piece for the opponent
+  public GamePieceType OpponentCatType { get; private set; } //The type of frog game piece for the opponent
 
   private MainUIEventHandler _uiManager; //Reference to the main UI event handler
 
@@ -38,41 +38,33 @@ public class GamePieceManager : MonoBehaviour
     _uiManager = GameObject.Find("GameUI").GetComponent<MainUIEventHandler>();
   }
 
-  /*-------------------------------------------
-  * Set the tadpole type based on the player id
-  * @param playerId - The player id
-  ---------------------------------------------*/
-  public void SetTadpoleType(int playerId)
+  public void SetKittenType(int playerId)
   {
     if (playerId == 1)
     {
-      ClientTadpoleType = GamePieceType.OrangeTadpole;
-      OpponentTadpoleType = GamePieceType.PurpleTadpole;
+      ClientKittenType = GamePieceType.OrangeKitten;
+      OpponentKittenType = GamePieceType.GrayKitten;
     }
     else
     {
-      ClientTadpoleType = GamePieceType.PurpleTadpole;
-      OpponentTadpoleType = GamePieceType.OrangeTadpole;
+      ClientKittenType = GamePieceType.GrayKitten;
+      OpponentKittenType = GamePieceType.OrangeKitten;
     }
 
-    _uiManager.SetUIGamePieces();
+    // _uiManager.SetUIGamePieces();
   }
 
-  /*-------------------------------------------
-  * Set the frog type based on the player id
-  * @param playerId - The player id
-  ---------------------------------------------*/
-  public void SetFrogType(int playerId)
+  public void SetCatType(int playerId)
   {
     if (playerId == 1)
     {
-      ClientFrogType = GamePieceType.OrangeFrog;
-      OpponentFrogType = GamePieceType.PurpleFrog;
+      ClientCatType = GamePieceType.OrangeCat;
+      OpponentCatType = GamePieceType.GrayCat;
     }
     else
     {
-      ClientFrogType = GamePieceType.PurpleFrog;
-      OpponentFrogType = GamePieceType.OrangeFrog;
+      ClientCatType = GamePieceType.GrayCat;
+      OpponentCatType = GamePieceType.OrangeCat;
     }
   }
 }

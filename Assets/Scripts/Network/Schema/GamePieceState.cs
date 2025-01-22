@@ -19,14 +19,17 @@ public GamePieceState() { }
 	[Type(0, "string")]
 	public string type = default(string);
 
-	[Type(1, "int32")]
-	public int playerId = default(int);
+	[Type(1, "int8")]
+	public sbyte playerId = default(sbyte);
 
-	[Type(2, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate priorCoordinate = new ArrayCoordinate();
+	[Type(2, "ref", typeof(Vector2Schema))]
+	public Vector2Schema coordinate = new Vector2Schema();
 
-	[Type(3, "ref", typeof(TransformPosition))]
-	public TransformPosition position = new TransformPosition();
+	[Type(3, "boolean")]
+	public bool isGraduating = default(bool);
+
+	[Type(4, "string")]
+	public string outOfBounds = default(string);
 
 	/*
 	 * Support for individual property change callbacks below...
@@ -44,48 +47,61 @@ public GamePieceState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<int> __playerIdChange;
-	public Action OnPlayerIdChange(PropertyChangeHandler<int> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<sbyte> __playerIdChange;
+	public Action OnPlayerIdChange(PropertyChangeHandler<sbyte> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.playerId));
 		__playerIdChange += __handler;
-		if (__immediate && this.playerId != default(int)) { __handler(this.playerId, default(int)); }
+		if (__immediate && this.playerId != default(sbyte)) { __handler(this.playerId, default(sbyte)); }
 		return () => {
 			__callbacks.RemovePropertyCallback(nameof(playerId));
 			__playerIdChange -= __handler;
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __priorCoordinateChange;
-	public Action OnPriorCoordinateChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __coordinateChange;
+	public Action OnCoordinateChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.priorCoordinate));
-		__priorCoordinateChange += __handler;
-		if (__immediate && this.priorCoordinate != null) { __handler(this.priorCoordinate, null); }
+		__callbacks.AddPropertyCallback(nameof(this.coordinate));
+		__coordinateChange += __handler;
+		if (__immediate && this.coordinate != null) { __handler(this.coordinate, null); }
 		return () => {
-			__callbacks.RemovePropertyCallback(nameof(priorCoordinate));
-			__priorCoordinateChange -= __handler;
+			__callbacks.RemovePropertyCallback(nameof(coordinate));
+			__coordinateChange -= __handler;
 		};
 	}
 
-	protected event PropertyChangeHandler<TransformPosition> __positionChange;
-	public Action OnPositionChange(PropertyChangeHandler<TransformPosition> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<bool> __isGraduatingChange;
+	public Action OnIsGraduatingChange(PropertyChangeHandler<bool> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.position));
-		__positionChange += __handler;
-		if (__immediate && this.position != null) { __handler(this.position, null); }
+		__callbacks.AddPropertyCallback(nameof(this.isGraduating));
+		__isGraduatingChange += __handler;
+		if (__immediate && this.isGraduating != default(bool)) { __handler(this.isGraduating, default(bool)); }
 		return () => {
-			__callbacks.RemovePropertyCallback(nameof(position));
-			__positionChange -= __handler;
+			__callbacks.RemovePropertyCallback(nameof(isGraduating));
+			__isGraduatingChange -= __handler;
+		};
+	}
+
+	protected event PropertyChangeHandler<string> __outOfBoundsChange;
+	public Action OnOutOfBoundsChange(PropertyChangeHandler<string> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.outOfBounds));
+		__outOfBoundsChange += __handler;
+		if (__immediate && this.outOfBounds != default(string)) { __handler(this.outOfBounds, default(string)); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(outOfBounds));
+			__outOfBoundsChange -= __handler;
 		};
 	}
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(type): __typeChange?.Invoke((string) change.Value, (string) change.PreviousValue); break;
-			case nameof(playerId): __playerIdChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
-			case nameof(priorCoordinate): __priorCoordinateChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(position): __positionChange?.Invoke((TransformPosition) change.Value, (TransformPosition) change.PreviousValue); break;
+			case nameof(playerId): __playerIdChange?.Invoke((sbyte) change.Value, (sbyte) change.PreviousValue); break;
+			case nameof(coordinate): __coordinateChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(isGraduating): __isGraduatingChange?.Invoke((bool) change.Value, (bool) change.PreviousValue); break;
+			case nameof(outOfBounds): __outOfBoundsChange?.Invoke((string) change.Value, (string) change.PreviousValue); break;
 			default: break;
 		}
 	}

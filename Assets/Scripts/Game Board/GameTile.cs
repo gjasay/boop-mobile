@@ -2,51 +2,70 @@ using UnityEngine;
 
 public class GameTile : MonoBehaviour
 {
-  //Properties
-  public Vector2Int ArrayPosition { get; set; } //The position of the game tile in the 2D array
-  public PlacedPiece CurrentlyHeldPiece { get; set; } //The game piece currently held by the game tile
+    public Vector2Int ArrayPosition { get; set; }
+    public GamePiece CurrentlyHeldPiece { get; set; }
 
-  //Private variables
-  private GameboardManager _gameboardManager; //Reference to the GameboardManager
+    private GameboardManager _gameboardManager;
 
-  // Start is called before the first frame update
-  private void Start()
-  {
-    _gameboardManager = GameboardManager.Instance;
-    transform.SetParent(_gameboardManager.transform); //Set the GameTile's parent to the GameboardManager
-  }
-
-  // Update is called once per frame
-  private void Update()
-  {
-    SetLastTouchedTile();
-  }
-
-  /*-------------------------------------------------
-   * Detect if the game tile is being touched
-   * @return true if the game tile is being touched
-   --------------------------------------------------*/
-  private void SetLastTouchedTile()
-  {
-    if (Input.touchCount > 0)
+    void Start()
     {
-      //Get the touch position
-      Touch touch = Input.GetTouch(0);
-      Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
-      touchPosition.z = 0;
-
-      // Get all colliders at the touch position
-      Collider2D[] colliders = Physics2D.OverlapPointAll(touchPosition);
-
-      // Check if the touch position is over the game tile
-      foreach (Collider2D collider in colliders)
-      {
-        if (collider == GetComponent<Collider2D>())
-        {
-          _gameboardManager.LastTouchedGameTile = this;
-          break;
-        }
-      }
+        _gameboardManager = GameboardManager.Instance;
+        transform.SetParent(_gameboardManager.transform);
     }
-  }
+
+    void Update()
+    {
+        SetLastTouchedTile();
+    }
+
+    public void PlacePiece(int playerId, string pieceType)
+    {
+        if (CurrentlyHeldPiece != null && CurrentlyHeldPiece.clientPlacement) Destroy(CurrentlyHeldPiece.gameObject);
+        GameObject prefab;
+        switch (pieceType)
+        {
+            case "kitten" when playerId == NetworkManager.Instance.PlayerId:
+                prefab = ResourceManager.Instance.GetPrefab(GamePieceManager.Instance.ClientKittenType);
+                break;
+            case "cat" when playerId == NetworkManager.Instance.PlayerId:
+                prefab = ResourceManager.Instance.GetPrefab(GamePieceManager.Instance.ClientCatType);
+                break;
+            case "kitten" when playerId != NetworkManager.Instance.PlayerId:
+                prefab = ResourceManager.Instance.GetPrefab(GamePieceManager.Instance.OpponentKittenType);
+                break;
+            case "cat" when playerId != NetworkManager.Instance.PlayerId:
+                prefab = ResourceManager.Instance.GetPrefab(GamePieceManager.Instance.OpponentCatType);
+                break;
+            default:
+                Debug.LogError("Invalid game piece type: " + pieceType);
+                return;
+        }
+        GameObject gamePiece = Instantiate(prefab, transform.position, Quaternion.identity);
+        GamePiece piece = gamePiece.AddComponent<GamePiece>();
+        piece.SetTilePlacement(this);
+    }
+
+    private void SetLastTouchedTile()
+    {
+        if (Input.touchCount > 0)
+        {
+            // Get the touch position
+            Touch touch = Input.GetTouch(0);
+            Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
+            touchPosition.z = 0;
+
+            // Get all colliders at the touch position
+            Collider2D[] colliders = Physics2D.OverlapPointAll(touchPosition);
+
+            // Check if the touch position is over the game tile
+            foreach (Collider2D collider in colliders)
+            {
+                if (collider == GetComponent<Collider2D>())
+                {
+                    _gameboardManager.LastTouchedGameTile = this;
+                    break;
+                }
+            }
+        }
+    }
 }

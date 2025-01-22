@@ -16,36 +16,36 @@ public partial class NeighborState : Schema {
 [Preserve] 
 #endif
 public NeighborState() { }
-	[Type(0, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate up = new ArrayCoordinate();
+	[Type(0, "ref", typeof(Vector2Schema))]
+	public Vector2Schema up = new Vector2Schema();
 
-	[Type(1, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate down = new ArrayCoordinate();
+	[Type(1, "ref", typeof(Vector2Schema))]
+	public Vector2Schema down = new Vector2Schema();
 
-	[Type(2, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate left = new ArrayCoordinate();
+	[Type(2, "ref", typeof(Vector2Schema))]
+	public Vector2Schema left = new Vector2Schema();
 
-	[Type(3, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate right = new ArrayCoordinate();
+	[Type(3, "ref", typeof(Vector2Schema))]
+	public Vector2Schema right = new Vector2Schema();
 
-	[Type(4, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate upLeft = new ArrayCoordinate();
+	[Type(4, "ref", typeof(Vector2Schema))]
+	public Vector2Schema upLeft = new Vector2Schema();
 
-	[Type(5, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate upRight = new ArrayCoordinate();
+	[Type(5, "ref", typeof(Vector2Schema))]
+	public Vector2Schema upRight = new Vector2Schema();
 
-	[Type(6, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate downLeft = new ArrayCoordinate();
+	[Type(6, "ref", typeof(Vector2Schema))]
+	public Vector2Schema downLeft = new Vector2Schema();
 
-	[Type(7, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate downRight = new ArrayCoordinate();
+	[Type(7, "ref", typeof(Vector2Schema))]
+	public Vector2Schema downRight = new Vector2Schema();
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __upChange;
-	public Action OnUpChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __upChange;
+	public Action OnUpChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.up));
 		__upChange += __handler;
@@ -56,8 +56,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __downChange;
-	public Action OnDownChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __downChange;
+	public Action OnDownChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.down));
 		__downChange += __handler;
@@ -68,8 +68,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __leftChange;
-	public Action OnLeftChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __leftChange;
+	public Action OnLeftChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.left));
 		__leftChange += __handler;
@@ -80,8 +80,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __rightChange;
-	public Action OnRightChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __rightChange;
+	public Action OnRightChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.right));
 		__rightChange += __handler;
@@ -92,8 +92,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __upLeftChange;
-	public Action OnUpLeftChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __upLeftChange;
+	public Action OnUpLeftChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.upLeft));
 		__upLeftChange += __handler;
@@ -104,8 +104,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __upRightChange;
-	public Action OnUpRightChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __upRightChange;
+	public Action OnUpRightChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.upRight));
 		__upRightChange += __handler;
@@ -116,8 +116,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __downLeftChange;
-	public Action OnDownLeftChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __downLeftChange;
+	public Action OnDownLeftChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.downLeft));
 		__downLeftChange += __handler;
@@ -128,8 +128,8 @@ public NeighborState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArrayCoordinate> __downRightChange;
-	public Action OnDownRightChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __downRightChange;
+	public Action OnDownRightChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.downRight));
 		__downRightChange += __handler;
@@ -142,14 +142,14 @@ public NeighborState() { }
 
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(up): __upChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(down): __downChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(left): __leftChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(right): __rightChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(upLeft): __upLeftChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(upRight): __upRightChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(downLeft): __downLeftChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(downRight): __downRightChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
+			case nameof(up): __upChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(down): __downChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(left): __leftChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(right): __rightChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(upLeft): __upLeftChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(upRight): __upRightChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(downLeft): __downLeftChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
+			case nameof(downRight): __downRightChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
 			default: break;
 		}
 	}

@@ -16,61 +16,28 @@ public partial class TileState : Schema {
 [Preserve] 
 #endif
 public TileState() { }
-	[Type(0, "ref", typeof(GamePieceState))]
-	public GamePieceState gamePiece = new GamePieceState();
+	[Type(0, "ref", typeof(Vector2Schema))]
+	public Vector2Schema coordinate = new Vector2Schema();
 
-	[Type(1, "ref", typeof(ArrayCoordinate))]
-	public ArrayCoordinate arrayPosition = new ArrayCoordinate();
-
-	[Type(2, "ref", typeof(TransformPosition))]
-	public TransformPosition position = new TransformPosition();
-
-	[Type(3, "ref", typeof(NeighborState))]
+	[Type(1, "ref", typeof(NeighborState))]
 	public NeighborState neighbor = new NeighborState();
 
-	[Type(4, "array", typeof(ArraySchema<ArrayCoordinate>))]
-	public ArraySchema<ArrayCoordinate> neighbors = new ArraySchema<ArrayCoordinate>();
-
-	[Type(5, "string")]
-	public string outOfBounds = default(string);
+	[Type(2, "array", typeof(ArraySchema<Vector2Schema>))]
+	public ArraySchema<Vector2Schema> neighbors = new ArraySchema<Vector2Schema>();
 
 	/*
 	 * Support for individual property change callbacks below...
 	 */
 
-	protected event PropertyChangeHandler<GamePieceState> __gamePieceChange;
-	public Action OnGamePieceChange(PropertyChangeHandler<GamePieceState> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<Vector2Schema> __coordinateChange;
+	public Action OnCoordinateChange(PropertyChangeHandler<Vector2Schema> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.gamePiece));
-		__gamePieceChange += __handler;
-		if (__immediate && this.gamePiece != null) { __handler(this.gamePiece, null); }
+		__callbacks.AddPropertyCallback(nameof(this.coordinate));
+		__coordinateChange += __handler;
+		if (__immediate && this.coordinate != null) { __handler(this.coordinate, null); }
 		return () => {
-			__callbacks.RemovePropertyCallback(nameof(gamePiece));
-			__gamePieceChange -= __handler;
-		};
-	}
-
-	protected event PropertyChangeHandler<ArrayCoordinate> __arrayPositionChange;
-	public Action OnArrayPositionChange(PropertyChangeHandler<ArrayCoordinate> __handler, bool __immediate = true) {
-		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.arrayPosition));
-		__arrayPositionChange += __handler;
-		if (__immediate && this.arrayPosition != null) { __handler(this.arrayPosition, null); }
-		return () => {
-			__callbacks.RemovePropertyCallback(nameof(arrayPosition));
-			__arrayPositionChange -= __handler;
-		};
-	}
-
-	protected event PropertyChangeHandler<TransformPosition> __positionChange;
-	public Action OnPositionChange(PropertyChangeHandler<TransformPosition> __handler, bool __immediate = true) {
-		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.position));
-		__positionChange += __handler;
-		if (__immediate && this.position != null) { __handler(this.position, null); }
-		return () => {
-			__callbacks.RemovePropertyCallback(nameof(position));
-			__positionChange -= __handler;
+			__callbacks.RemovePropertyCallback(nameof(coordinate));
+			__coordinateChange -= __handler;
 		};
 	}
 
@@ -86,8 +53,8 @@ public TileState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<ArraySchema<ArrayCoordinate>> __neighborsChange;
-	public Action OnNeighborsChange(PropertyChangeHandler<ArraySchema<ArrayCoordinate>> __handler, bool __immediate = true) {
+	protected event PropertyChangeHandler<ArraySchema<Vector2Schema>> __neighborsChange;
+	public Action OnNeighborsChange(PropertyChangeHandler<ArraySchema<Vector2Schema>> __handler, bool __immediate = true) {
 		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
 		__callbacks.AddPropertyCallback(nameof(this.neighbors));
 		__neighborsChange += __handler;
@@ -98,26 +65,11 @@ public TileState() { }
 		};
 	}
 
-	protected event PropertyChangeHandler<string> __outOfBoundsChange;
-	public Action OnOutOfBoundsChange(PropertyChangeHandler<string> __handler, bool __immediate = true) {
-		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
-		__callbacks.AddPropertyCallback(nameof(this.outOfBounds));
-		__outOfBoundsChange += __handler;
-		if (__immediate && this.outOfBounds != default(string)) { __handler(this.outOfBounds, default(string)); }
-		return () => {
-			__callbacks.RemovePropertyCallback(nameof(outOfBounds));
-			__outOfBoundsChange -= __handler;
-		};
-	}
-
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
-			case nameof(gamePiece): __gamePieceChange?.Invoke((GamePieceState) change.Value, (GamePieceState) change.PreviousValue); break;
-			case nameof(arrayPosition): __arrayPositionChange?.Invoke((ArrayCoordinate) change.Value, (ArrayCoordinate) change.PreviousValue); break;
-			case nameof(position): __positionChange?.Invoke((TransformPosition) change.Value, (TransformPosition) change.PreviousValue); break;
+			case nameof(coordinate): __coordinateChange?.Invoke((Vector2Schema) change.Value, (Vector2Schema) change.PreviousValue); break;
 			case nameof(neighbor): __neighborChange?.Invoke((NeighborState) change.Value, (NeighborState) change.PreviousValue); break;
-			case nameof(neighbors): __neighborsChange?.Invoke((ArraySchema<ArrayCoordinate>) change.Value, (ArraySchema<ArrayCoordinate>) change.PreviousValue); break;
-			case nameof(outOfBounds): __outOfBoundsChange?.Invoke((string) change.Value, (string) change.PreviousValue); break;
+			case nameof(neighbors): __neighborsChange?.Invoke((ArraySchema<Vector2Schema>) change.Value, (ArraySchema<Vector2Schema>) change.PreviousValue); break;
 			default: break;
 		}
 	}

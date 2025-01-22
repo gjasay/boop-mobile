@@ -1,44 +1,41 @@
-using UnityEngine;
-using Colyseus;
 using System;
 using System.Threading.Tasks;
+using Colyseus;
+using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
 {
-  public static NetworkManager Instance { get; private set; } //Singleton instance
+  public static NetworkManager Instance { get; private set; }  // Singleton instance
 
-  /* Properties */
-  public int PlayerId { get; private set; } // The player id of the player
-  public string ClientId { get; private set; } // The client id of the player
-  public string RoomId { get; private set; } // The room id of the room
+  public int PlayerId { get; private set; }
+  public string ClientId { get; private set; }
+  public string RoomId { get; private set; }
 
-  /* Events */
-  public event Action<BoardState> OnBoardCreated; //Event that is triggered when the board state changes
+  public event Action OnGameInitialized;
+  public event Action<GameState> OnBoardCreated;
   public event Action OnPlayerJoined;
-  public event Action<TileState> OnTileChange; //Event that is triggered when the board state changes
-  public event Action<HandState> OnHandChanged; //Event that is triggered when the UI state changes
-  public event Action<PlayerState> OnClientUpdate; //Event that is triggered when the client player state changes
-  public event Action<PlayerState> OnOpponentUpdate; //Event that is triggered when the opponent player state changes
-  public event Action<int> OnPlayerWin; //Event that is triggered when a player wins
+  public event Action<Vector2Int> OnTileChange;
+  public event Action<HandState> OnHandChanged;
+  public event Action<PlayerState> OnClientUpdate;
+  public event Action<PlayerState> OnOpponentUpdate;
+  public event Action<int> OnPlayerWin;
 
-  /* Private variables */
   private bool _boardCreated = false;
-  private ColyseusClient _client; //Reference to the Colyseus client
-  private ColyseusRoom<GameState> _room; //Reference to the Game room
-  private MainUIEventHandler _uiManager; //Reference to the UIManager
-  private GameboardManager _gameboardManager; //Reference to the GameboardManager
+  private bool _roomHandlersRegistered = false;
+  private ColyseusClient _client;
+  private ColyseusRoom<GameState> _room;
+  private MainUIEventHandler _uiManager;
+  private GameboardManager _gameboardManager;
 
   private void Awake()
   {
-    if (Instance == null)
-    {
-      Instance = this;
-      DontDestroyOnLoad(gameObject);
-      InitializeClient();
-    }
-    else
-    {
+    if (Instance != null && Instance != this) {
       Destroy(gameObject);
+    } else {
+      Instance = this;
+      Debug.Log("Good morning!");
+      InitializeClient();
+      // DontDestroyOnLoad(gameObject);
     }
   }
 
@@ -48,188 +45,218 @@ public class NetworkManager : MonoBehaviour
     _gameboardManager = GameboardManager.Instance;
   }
 
-  /*------------------------------------------
-  * Create a new room on the server
-  * @param roomName - The name of the room
-  * @return Task - The task to create a room
-  -------------------------------------------*/
-  public async Task CreateRoom(string roomName, int time)
+  private void OnDestroy()
   {
-    _room = await _client.Create<GameState>(roomName); //Create a new room on the server
-    RegisterRoomHandlers(); //Register the room handlers
-    await _room.Send("createRoom", new { time });
-
-    GetClientId();
-    GetRoomId();
-
-    PlayerId = 1;
-    InitializeUIListener();
-    GamePieceManager.Instance.SetFrogType(PlayerId);
-    GamePieceManager.Instance.SetTadpoleType(PlayerId);
-  }
-
-  /*--------------------------------------------
-  * Join an existing room on the server
-  * @param roomId - The id of the room to join
-  * @return Task - The task to join a room
-  ----------------------------------------------*/
-  public async Task JoinRoom(string roomId)
-  {
-    _room = await _client.JoinOrCreate<GameState>("my_room"); //Join a colyseus room
-    RegisterRoomHandlers(); //Register the room handlers
-
-    GetClientId();
-    GetRoomId();
-
-    PlayerId = 2;
-    InitializeUIListener();
-    GamePieceManager.Instance.SetFrogType(PlayerId);
-    GamePieceManager.Instance.SetTadpoleType(PlayerId);
-  }
-
-  public async Task JoinOrCreateRoom()
-  {
-    _room = await _client.JoinOrCreate<GameState>("my_room"); //Join a colyseus room
-    RegisterRoomHandlers(); //Register the room handlers
-
-    GetClientId();
-    GetRoomId();
-
-    // _uiManager.DisableRoomCodeText();
-
-    //check if player created or joined room
-    // if (_room.State.plq)
-
-    PlayerId = 2;
-    InitializeUIListener();
-    GamePieceManager.Instance.SetFrogType(PlayerId);
-    GamePieceManager.Instance.SetTadpoleType(PlayerId);
-  }
-  
-  public void LeaveRoom()
-  {
-    if (NullCheckRoom()) return;
+    Debug.Log("network mananger was destoyed :(");
+    _roomHandlersRegistered = false;
+    if (NullCheckRoom())
+      return;
     _room.Leave();
   }
-  
+
+  public ColyseusRoom<GameState> GameRoom {
+    get {
+      return _room;
+    }
+  }
+
+  public async Task CreateRoom(int time)
+  {
+    _room = await _client.Create<GameState>(GetRoomName(time));
+    InitializeGame();
+  }
+
+  public async Task JoinRoom(string roomId)
+  {
+    _room = await _client.JoinById<GameState>(roomId);
+    InitializeGame();
+  }
+
+  public async Task JoinOrCreateRoom(int time)
+  {
+    _room = await _client.JoinOrCreate<GameState>(GetRoomName(time));
+    InitializeGame();
+  }
+
+  public void LeaveRoom()
+  {
+    if (NullCheckRoom())
+      return;
+    _room.Leave();
+  }
+
   public void ReconnectToRoom()
   {
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
     // _room.Connect();
     Debug.Log("Reconnecting to room");
   }
 
-  /*-------------------------------
-  * Initialize the Colyseus client
-  ---------------------------------*/
-  private void InitializeClient()
+  private string GetRoomName(int time)
   {
-    _client = new ColyseusClient("ws://localhost:2567"); //Create a new Colyseus client
+    switch (time) {
+      case 5:
+        return "classic_five";
+      case 10:
+        return "classic_ten";
+      case 15:
+        return "classic_fifteen";
+      case 20:
+        return "classic_twenty";
+      case 30:
+        return "classic_thirty";
+      default:
+        Debug.LogError("Invalid Time Option: " + time);
+        return null;
+    }
   }
 
-  /*---------------------------
-  * Register the room handlers
-  -----------------------------*/
+  private async void InitializeGame()
+  {
+    // GameboardManager.Instance.GamePieces.Clear();
+    _boardCreated = false;
+    _roomHandlersRegistered = false;
+    PlayerId = 0;
+    RegisterRoomHandlers();
+    await GetPlayerIdAsync();
+    GetClientId();
+    GetRoomId();
+    InitializeUIListeners();
+    GamePieceManager.Instance.SetCatType(PlayerId);
+    GamePieceManager.Instance.SetKittenType(PlayerId);
+    OnGameInitialized?.Invoke();
+  }
+
+  private async Task<int> GetPlayerIdAsync()
+  {
+    while (PlayerId == 0) {
+      await Task.Delay(100);
+    }
+
+    return PlayerId;
+  }
+
+  private void InitializeClient()
+  {
+    
+    _client = new ColyseusClient("ws://localhost:2567");
+  }
+
   private void RegisterRoomHandlers()
   {
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
+    if (_roomHandlersRegistered)
+      return;
 
-    /*-------------------------------------------
-    * Trigger events when the game state changes
-    ---------------------------------------------*/
-    _room.State.board.OnChange(() =>
-    {
-      if (_room.State.board == null) return;
+    _room.State.tiles.OnChange((cur, prev) =>
+                               {
+                                 if (_room.State.tiles == null)
+                                   return;
 
-      if (_boardCreated) return;
-      _boardCreated = true;
-      OnBoardCreated?.Invoke(_room.State.board);
-    });
+                                 if (_boardCreated)
+                                   return;
+                                 _boardCreated = true;
+                                 OnBoardCreated?.Invoke(_room.State);
+                               });
 
-    _room.State.OnWinnerChange((value, prev) => { OnPlayerWin?.Invoke(value); });
+    _room.State.gamePieces.OnAdd(
+        (index, piece) =>
+        {
+          GamePiece gamePiece = Instantiate(ResourceManager.Instance.OrangeKittenPrefab,
+                                            Vector3.zero, Quaternion.identity)
+                                    .AddComponent<GamePiece>();
+          GameboardManager.Instance.GamePieces.Add(index, gamePiece);
+          gamePiece.Initialize(piece);
+          piece.OnCoordinateChange((cur, prev) =>
+                                   { gamePiece.HandleCoordinateChange(cur, prev); });
+          piece.OnTypeChange((cur, prev) =>
+                             { gamePiece.HandleTypeChange(cur, prev); });
+        });
+
+    _room.State.gamePieces.OnRemove((index, _piece) =>
+                                    {
+                                      GamePiece gamePiece =
+                                          GameboardManager.Instance.GamePieces[index];
+                                      GameboardManager.Instance.GamePieces.Remove(index);
+                                      // Destroy(gamePiece.gameObject);
+                                      // gamePiece.GetComponent<SpriteRenderer>().enabled = false;
+                                    });
+
+    _room.State.OnWinnerChange((value, prev) => OnPlayerWin?.Invoke(value));
 
     _room.State.playerOne.OnChange(() =>
-    {
-      if (PlayerId == 1)
-        OnClientUpdate?.Invoke(_room.State.playerOne);
-      else
-        OnOpponentUpdate?.Invoke(_room.State.playerOne);
-    });
-    
-    _room.State.playerTwo.OnChange(() =>
-    {
-      if (PlayerId == 2)
-        OnClientUpdate?.Invoke(_room.State.playerTwo);
-      else
-        OnOpponentUpdate?.Invoke(_room.State.playerTwo);
-    });
-    
-    /*--------------------------
-    * Messages from the server
-    ----------------------------*/
-    _room.OnMessage<string>("choosePieceToEvolve", (msg) => { _gameboardManager.SelectTadpoleToEvolve(); });
+                                   {
+                                     if (PlayerId == 1)
+                                       OnClientUpdate?.Invoke(_room.State.playerOne);
+                                     else
+                                       OnOpponentUpdate?.Invoke(_room.State.playerOne);
+                                   });
 
-    _room.OnMessage<string>("playerJoined", (msg) => { OnPlayerJoined?.Invoke(); });
+    _room.State.playerTwo.OnChange(() =>
+                                   {
+                                     if (PlayerId == 2)
+                                       OnClientUpdate?.Invoke(_room.State.playerTwo);
+                                     else
+                                       OnOpponentUpdate?.Invoke(_room.State.playerTwo);
+                                   });
+
+    // Room messages
+    _room.OnMessage<string>("choosePieceToEvolve",
+                            (msg) => _gameboardManager.SelectTadpoleToEvolve());
+    _room.OnMessage<int>("playerId", (id) => PlayerId = id);
+    _room.OnMessage<string>("roomInitialized", (msg) => OnBoardCreated?.Invoke(_room.State));
+
+    _roomHandlersRegistered = true;
   }
 
   public void SendEvolvingTadpole(int x, int y)
   {
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
     _room.Send("evolveTadpole", new { x, y, playerId = PlayerId });
   }
 
-  public void SendPieceMoved(GameTile tile)
+  public void SendPieceMoved(GamePiece piece)
   {
-    if (NullCheckRoom()) return;
-    _room.Send("pieceMoved", new { x = tile.ArrayPosition.x, y = tile.ArrayPosition.y });
-  }
-
-  /*-------------------------------------------
-  * Initialize the tile listener
-  ---------------------------------------------*/
-  public void InitializeTileListener()
-  {
-    _room.State.board.tiles.ForEach(tile =>
-    {
-      tile.OnChange(() =>
-      {
-        OnTileChange?.Invoke(
-          _room.State.board.tiles[
-            tile.arrayPosition.y * _room.State.board.width + tile.arrayPosition.x]);
-      });
-    });
+    if (NullCheckRoom())
+      return;
+    _room.Send("pieceMoved",
+               new { x = piece.Coordinate.x, y = piece.Coordinate.y, playerId = PlayerId });
   }
 
   public bool IsPlayerTurn()
   {
-    if (NullCheckRoom()) return false;
+    if (NullCheckRoom())
+      return false;
     return _room.State.currentPlayer == PlayerId;
   }
 
-  /*-------------------------------------------
-  * Request to place a tadpole on the board
-  * @param x - The x position of the piece
-  * @param y - The y position of the piece
-  * @param type - The type of the piece (tadpole or frog)
-  ---------------------------------------------*/
   public void PlacePiece(int x, int y, string type)
   {
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
     _room.Send("placePiece", new { x, y, type, playerId = PlayerId });
   }
 
-  private void InitializeUIListener()
+  private void InitializeUIListeners()
   {
-    Debug.Log("Initializing UI Listener");
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
     Debug.Log("Room is not null");
-    switch (PlayerId)
-    {
+    switch (PlayerId) {
       case 1:
-        _room.State.playerOne.hand.OnChange(() => { OnHandChanged?.Invoke(_room.State.playerOne.hand); });
+        _room.State.playerOne.hand.OnKittensChange(
+            (cur, prev) => OnHandChanged?.Invoke(_room.State.playerOne.hand));
+        _room.State.playerOne.hand.OnCatsChange(
+            (cur, prev) => OnHandChanged?.Invoke(_room.State.playerOne.hand));
         break;
       case 2:
-        _room.State.playerTwo.hand.OnChange(() => { OnHandChanged?.Invoke(_room.State.playerTwo.hand); });
+        _room.State.playerTwo.hand.OnKittensChange(
+            (cur, prev) => OnHandChanged?.Invoke(_room.State.playerTwo.hand));
+        _room.State.playerTwo.hand.OnCatsChange(
+            (cur, prev) => OnHandChanged?.Invoke(_room.State.playerTwo.hand));
         break;
       default:
         Debug.LogError("Player id is not set");
@@ -237,31 +264,25 @@ public class NetworkManager : MonoBehaviour
     }
   }
 
-  /*------------------
-  * Get the client id
-  --------------------*/
   private void GetClientId()
   {
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
     ClientId = _room.SessionId;
   }
 
-  /*------------------
-  * Get the room id
-  --------------------*/
   private void GetRoomId()
   {
-    if (NullCheckRoom()) return;
+    if (NullCheckRoom())
+      return;
     RoomId = _room.RoomId;
   }
 
-  /*--------------------------
-  * Check if the room is null
-  ----------------------------*/
   private bool NullCheckRoom()
   {
-    if (_room != null) return false;
-    Debug.LogError("Room is null");
+    if (_room != null)
+      return false;
+    Debug.Log("Room is null");
     return true;
   }
 }

@@ -19,10 +19,13 @@ public BoardState() { }
 	[Type(0, "array", typeof(ArraySchema<TileState>))]
 	public ArraySchema<TileState> tiles = new ArraySchema<TileState>();
 
-	[Type(1, "int32")]
-	public int width = default(int);
+	[Type(1, "array", typeof(ArraySchema<GamePieceState>))]
+	public ArraySchema<GamePieceState> gamePieces = new ArraySchema<GamePieceState>();
 
 	[Type(2, "int32")]
+	public int width = default(int);
+
+	[Type(3, "int32")]
 	public int height = default(int);
 
 	/*
@@ -38,6 +41,18 @@ public BoardState() { }
 		return () => {
 			__callbacks.RemovePropertyCallback(nameof(tiles));
 			__tilesChange -= __handler;
+		};
+	}
+
+	protected event PropertyChangeHandler<ArraySchema<GamePieceState>> __gamePiecesChange;
+	public Action OnGamePiecesChange(PropertyChangeHandler<ArraySchema<GamePieceState>> __handler, bool __immediate = true) {
+		if (__callbacks == null) { __callbacks = new SchemaCallbacks(); }
+		__callbacks.AddPropertyCallback(nameof(this.gamePieces));
+		__gamePiecesChange += __handler;
+		if (__immediate && this.gamePieces != null) { __handler(this.gamePieces, null); }
+		return () => {
+			__callbacks.RemovePropertyCallback(nameof(gamePieces));
+			__gamePiecesChange -= __handler;
 		};
 	}
 
@@ -68,6 +83,7 @@ public BoardState() { }
 	protected override void TriggerFieldChange(DataChange change) {
 		switch (change.Field) {
 			case nameof(tiles): __tilesChange?.Invoke((ArraySchema<TileState>) change.Value, (ArraySchema<TileState>) change.PreviousValue); break;
+			case nameof(gamePieces): __gamePiecesChange?.Invoke((ArraySchema<GamePieceState>) change.Value, (ArraySchema<GamePieceState>) change.PreviousValue); break;
 			case nameof(width): __widthChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			case nameof(height): __heightChange?.Invoke((int) change.Value, (int) change.PreviousValue); break;
 			default: break;

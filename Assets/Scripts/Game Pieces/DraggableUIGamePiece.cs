@@ -4,65 +4,52 @@ using UnityEngine;
 
 public class DraggableUIGamePiece : MonoBehaviour
 {
-  //Properties
-  public bool IsDragging { get; set; } //True if the game piece is being dragged
+  public bool IsDragging { get; set; }
 
-  private enum DraggerType { Tadpole, Frog } //The type of game piece this dragger is responsible for
+  private enum DraggerType { Cat, Kitten }
 
-  [SerializeField] private DraggerType _draggerType; //The type of game piece that can be dragged
+  [SerializeField] private DraggerType _draggerType;
 
-  //Private variables
-  private SpriteRenderer _spriteRenderer; //Reference to the sprite renderer
-  private ResourceManager _resourceManager; //Reference to the resource manager
-  private GamePieceManager _gamePieceManager; //Reference to the game piece manager
-  private NetworkManager _networkManager; //Reference to the network manager
-  private GameObject _prefab; //Reference to the prefab to be instantiated
-  private Sprite _sprite; //The sprite of the game piece
+  private SpriteRenderer _spriteRenderer;
+  private ResourceManager _resourceManager;
+  private GamePieceManager _gamePieceManager;
+  private GameObject _prefab;
+  private Sprite _sprite;
 
-  // Start is called before the first frame update
   void Start()
   {
     _spriteRenderer = GetComponent<SpriteRenderer>();
     _resourceManager = ResourceManager.Instance;
     _gamePieceManager = GamePieceManager.Instance;
-    _networkManager = NetworkManager.Instance;
+
+    NetworkManager.Instance.OnGameInitialized += SetUIGamePieces;
   }
 
-  // Update is called once per frame
   void Update()
   {
     DragPiece();
   }
 
-  /*-----------------------------------------------
-   * Set the UI game pieces based on the player id
-   ------------------------------------------------*/
-
-  public void SetUIGamePieces()
+  private void SetUIGamePieces()
   {
     switch (_draggerType)
     {
-      case DraggerType.Tadpole:
-        _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientTadpoleType);
-        _sprite = _resourceManager.GetSprite(_gamePieceManager.ClientTadpoleType);
+      case DraggerType.Kitten:
+        _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientKittenType);
+        _sprite = _resourceManager.GetSprite(_gamePieceManager.ClientKittenType);
         break;
-      case DraggerType.Frog:
-        _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientFrogType);
-        _sprite = _resourceManager.GetSprite(_gamePieceManager.ClientFrogType);
+      case DraggerType.Cat:
+        _prefab = _resourceManager.GetPrefab(_gamePieceManager.ClientCatType);
+        _sprite = _resourceManager.GetSprite(_gamePieceManager.ClientCatType);
         break;
     }
 
     _spriteRenderer.sprite = _sprite;
   }
 
-  /*--------------------------------------------------------------
-   * This method is called when the game piece is tapped
-   * Instantiate a new game piece that can be dragged on the game board
-   * That game piece is then snapped to the nearest game tile
-   ---------------------------------------------------------------*/
   private void DragPiece()
   {
-    if (!_networkManager.IsPlayerTurn()) return;
+    if (!NetworkManager.Instance.IsPlayerTurn()) return;
     if (DetectTouch() && !IsDragging)
     {
       GameObject newGamePiece = Instantiate(_prefab, transform.position, Quaternion.identity);
@@ -71,15 +58,11 @@ public class DraggableUIGamePiece : MonoBehaviour
       newGamePiece.GetComponent<DragHandler>().UIGamePiece = this;
 
       //Set the game piece type
-      newGamePiece.GetComponent<DragHandler>().TypeOfPiece = _draggerType == DraggerType.Tadpole ? _gamePieceManager.ClientTadpoleType : _gamePieceManager.ClientFrogType;
+      newGamePiece.GetComponent<DragHandler>().TypeOfPiece = _draggerType == DraggerType.Cat ? _gamePieceManager.ClientCatType : _gamePieceManager.ClientKittenType;
       IsDragging = true;
     }
   }
 
-  /*--------------------------------------------------------------------------
-   * Detect if the player has touched the game piece
-   * @return - True if the player has touched the game piece, false otherwise
-   ---------------------------------------------------------------------------*/
   private bool DetectTouch()
   {
     if (Input.touchCount > 0)

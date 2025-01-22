@@ -1,12 +1,8 @@
-interface RoomSettings
-{
-  time: number;
-}
-
-interface Coordinate
+interface PostAnimationMessage
 {
   x: number;
   y: number;
+  playerId: number;
 }
 
 interface PieceMessage
